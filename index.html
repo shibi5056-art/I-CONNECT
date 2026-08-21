@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I CONNECT - Mobile Shop Billing & Inventory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 flex flex-col md:flex-row min-h-screen">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-white shadow-md flex flex-col no-print border-r border-red-100">
+        <!-- Logo/Supermarket Branding -->
+        <div class="p-6 border-b border-red-100 flex items-center space-x-3 theme-red-bg text-white">
+            <div class="bg-white p-2 rounded-full text-red-600">
+                <i class="fas fa-mobile-alt text-xl px-1"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-wide">I CONNECT</h1>
+                <p class="text-xs text-red-200">Mobile Shop</p>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation Menu Links -->
+        <nav class="flex-1 px-4 py-6">
+            <a href="#" data-tab="dashboard" class="nav-link flex items-center p-3 my-1 rounded-lg nav-link-active transition-colors duration-200">
+                <i class="fas fa-chart-line w-6"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" data-tab="products" class="nav-link flex items-center p-3 my-1 rounded-lg nav-link-inactive transition-colors duration-200">
+                <i class="fas fa-boxes w-6"></i>
+                <span>Product Inventory</span>
+            </a>
+            <a href="#" data-tab="billing" class="nav-link flex items-center p-3 my-1 rounded-lg nav-link-inactive transition-colors duration-200">
+                <i class="fas fa-file-invoice-dollar w-6"></i>
+                <span>Billing Cart</span>
+            </a>
+            <a href="#" data-tab="sales-history" class="nav-link flex items-center p-3 my-1 rounded-lg nav-link-inactive transition-colors duration-200">
+                <i class="fas fa-history w-6"></i>
+                <span>Sales Invoices</span>
+            </a>
+            <a href="#" onclick="logoutUser()" class="flex items-center p-3 my-1 rounded-lg text-red-200 hover:text-white hover:bg-red-900 transition-colors duration-200 mt-6 font-semibold cursor-pointer">
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span>Log Out Account</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar footer -->
+        <div class="p-4 border-t border-gray-100 text-center text-xs text-gray-500">
+            &copy; 2026 I CONNECT Systems v1.0.0
+        </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 flex flex-col min-w-0 bg-gray-50">
+        
+        <!-- Header -->
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center no-print border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800 flex items-center space-x-2">
+                <span class="theme-red-text font-bold">●</span>
+                <span>Mobile Shop Point of Sale & Inventory Panel</span>
+            </h2>
+            <div class="flex items-center space-x-3">
+                <span id="user-display-name" class="text-sm font-bold theme-red-text">Welcome, Owner</span>
+                <span class="text-sm font-medium text-gray-400">|</span>
+                <span class="text-sm font-medium text-gray-600">Register: #01</span>
+                <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 flex items-center space-x-1">
+                    <span class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span>System Online</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Dashboard Content Tab -->
+        <section id="dashboard-tab" class="tab-content p-6 space-y-6">
+            <!-- Summary Stats Card Container -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Sales Widget -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales (Revenue)</p>
+                        <h3 id="dash-total-sales" class="text-2xl font-bold text-gray-800 mt-1">₹0.00</h3>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-full text-red-500">
+                        <i class="fas fa-rupee-sign text-2xl"></i>
+                    </div>
+                </div>
+
+                <!-- Products Count Widget -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Products</p>
+                        <h3 id="dash-total-products" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-full text-red-500">
+                        <i class="fas fa-barcode text-2xl"></i>
+                    </div>
+                </div>
+
+                <!-- Low Stock Widget -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between transition-colors">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Low Stock Alerts</p>
+                        <h3 id="dash-low-stock" class="text-2xl font-bold text-red-600 mt-1">0</h3>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-full text-red-500">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    </div>
+                </div>
+
+                <!-- Sales Count Widget -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Transactions</p>
+                        <h3 id="dash-transactions" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-full text-red-500">
+                        <i class="fas fa-receipt text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart & Recent Sales Split -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Sales Graph Widget -->
+                <div class="bg-white p-6 rounded-xl shadow-sm lg:col-span-2 border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                        <span>Sales Analytics (Last 7 Days)</span>
+                        <i class="fas fa-chart-area theme-red-text"></i>
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions Widget -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                        <span>Recent Billings</span>
+                        <i class="fas fa-history theme-red-text"></i>
+                    </h3>
+                    <div class="flex-1 overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs font-semibold text-gray-500 border-b">
+                                    <th class="py-2">Invoice</th>
+                                    <th class="py-2">Time</th>
+                                    <th class="py-2">Customer</th>
+                                    <th class="py-2">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-recent-sales" class="divide-y divide-gray-100">
+                                <!-- Dynamic entries from app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Inventory Tab -->
+        <section id="products-tab" class="tab-content p-6 space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex flex-1 flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <!-- Search Input -->
+                    <div class="relative flex-1 max-w-md">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" id="product-search-input" placeholder="Search by SKU, Name, or ID..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    </div>
+                    <!-- Category Dropdown Filter -->
+                    <select id="product-filter-category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <button onclick="openManageCategoriesModal()" class="theme-red-btn-outline flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold justify-center w-full sm:w-auto">
+                        <i class="fas fa-tags"></i>
+                        <span>Manage Categories</span>
+                    </button>
+                    <button onclick="openModal('add-product-modal')" class="theme-red-btn flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm justify-center w-full sm:w-auto">
+                        <i class="fas fa-plus"></i>
+                        <span>Add New Product</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product Database Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th class="px-6 py-4">Photo</th>
+                                <th class="px-6 py-4">ID</th>
+                                <th class="px-6 py-4">SKU / Barcode</th>
+                                <th class="px-6 py-4">Product Name</th>
+                                <th class="px-6 py-4">Category</th>
+                                <th class="px-6 py-4">Price</th>
+                                <th class="px-6 py-4">In Stock</th>
+                                <th class="px-6 py-4 text-right no-print">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body" class="divide-y divide-gray-100">
+                            <!-- Dynamic rows from app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Billing Cart Tab -->
+        <section id="billing-tab" class="tab-content p-6 space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Cart list layout -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2 flex flex-col space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b flex items-center justify-between">
+                        <span>Items Cart List</span>
+                        <button onclick="clearCart()" class="text-xs text-red-500 hover:text-red-700 flex items-center space-x-1 font-semibold">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>Clear Cart</span>
+                        </button>
+                    </h3>
+
+                    <!-- Scan SKU/Barcode Field -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="relative">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">SCAN BARCODE / SKU (Press Enter)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                    <i class="fas fa-barcode"></i>
+                                </span>
+                                <input type="text" id="billing-sku-input" placeholder="Scan SKU/Barcode number..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">OR SEARCH PRODUCT</label>
+                            <select id="billing-product-select" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Choose Product --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Scanned/Selected Product Preview -->
+                    <div id="selected-product-preview" class="hidden bg-red-50/50 border border-red-100 rounded-lg p-3 flex items-center justify-between transition-all duration-200">
+                        <div class="flex items-center space-x-3">
+                            <img id="preview-prod-img" src="https://placehold.co/100x100?text=No+Photo" class="w-12 h-12 object-cover rounded-lg border bg-white shadow-sm">
+                            <div>
+                                <h4 id="preview-prod-name" class="text-sm font-semibold text-gray-800">Product Name</h4>
+                                <p class="text-xs text-gray-500">SKU: <span id="preview-prod-sku">N/A</span> | Category: <span id="preview-prod-cat">N/A</span></p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p id="preview-prod-price" class="text-sm font-bold theme-red-text">₹0.00</p>
+                            <p class="text-xs text-gray-500">Stock: <span id="preview-prod-stock">0</span> left</p>
+                        </div>
+                    </div>
+
+                    <!-- Cart Content Table -->
+                    <div class="flex-1 overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase border-b">
+                                    <th class="px-4 py-3">Product Info</th>
+                                    <th class="px-4 py-3">Unit Price</th>
+                                    <th class="px-4 py-3">Qty</th>
+                                    <th class="px-4 py-3">Subtotal</th>
+                                    <th class="px-4 py-3 text-right">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-table-body" class="divide-y divide-gray-100">
+                                <!-- Dynamic rows from app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Checkout Summary panel -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col space-y-4 justify-between h-fit">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b mb-4 flex items-center justify-between">
+                            <span>Checkout Panel</span>
+                            <i class="fas fa-cash-register theme-red-text"></i>
+                        </h3>
+
+                        <!-- Customer Info details -->
+                        <div class="space-y-3 pb-4 border-b border-gray-100">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-1">CUSTOMER NAME</label>
+                                <input type="text" id="customer-name" placeholder="Walk-in Customer" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-1">CUSTOMER MOBILE</label>
+                                <input type="tel" id="customer-phone" placeholder="e.g. 9876543210" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            </div>
+                        </div>
+
+                        <!-- Calculations options -->
+                        <div class="space-y-3 py-4 border-b border-gray-100">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">DISCOUNT (₹)</label>
+                                    <input type="number" id="billing-discount" min="0" value="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">TAX RATE (%)</label>
+                                    <input type="number" id="billing-tax-rate" min="0" value="5" step="0.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Values display -->
+                        <div class="space-y-2 py-4 text-sm font-medium">
+                            <div class="flex justify-between text-gray-500">
+                                <span>Subtotal:</span>
+                                <span id="bill-subtotal">₹0.00</span>
+                            </div>
+                            <div class="flex justify-between text-red-500">
+                                <span>Discount:</span>
+                                <span id="bill-discount-amount">-₹0.00</span>
+                            </div>
+                            <div class="flex justify-between text-gray-500">
+                                <span>Tax amount:</span>
+                                <span id="bill-tax-amount">₹0.00</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold text-gray-800 pt-2 border-t">
+                                <span>Grand Total:</span>
+                                <span id="bill-total" class="theme-red-text">₹0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout button -->
+                    <button onclick="processCheckout()" class="theme-red-bg hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-md w-full flex items-center justify-center space-x-2 transition-all duration-200">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>Generate & Print Bill</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sales Invoice History Tab -->
+        <section id="sales-history-tab" class="tab-content p-6 space-y-6 hidden">
+            <div class="flex justify-between items-center pb-2">
+                <h2 class="text-xl font-bold text-gray-800">Sales Invoices History</h2>
+                <button onclick="clearSalesHistory()" class="text-xs text-red-500 hover:text-red-700 font-semibold border border-red-200 hover:bg-red-50 px-3 py-1.5 rounded-lg flex items-center space-x-1 no-print">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Clear All Invoices</span>
+                </button>
+            </div>
+            <!-- Search / filter bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="relative max-w-md">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="sales-search-input" placeholder="Search Invoices by ID, Customer Name, or Mobile..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+            </div>
+
+            <!-- Invoices table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th class="px-6 py-4">Invoice #</th>
+                                <th class="px-6 py-4">Date / Time</th>
+                                <th class="px-6 py-4">Customer Name</th>
+                                <th class="px-6 py-4">Customer Mobile</th>
+                                <th class="px-6 py-4">Grand Total</th>
+                                <th class="px-6 py-4 text-right no-print">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-history-body" class="divide-y divide-gray-100">
+                            <!-- Dynamic invoice items from app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal: Add New Product -->
+    <div id="add-product-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden flex flex-col">
+            <!-- Modal Header -->
+            <div class="theme-red-bg p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fas fa-plus mr-2"></i>Add New Inventory Item</h3>
+                <button onclick="closeModal('add-product-modal')" class="text-white hover:text-red-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <!-- Modal Content Form -->
+            <form id="add-product-form" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PRODUCT NAME *</label>
+                        <input type="text" id="add-p-name" required placeholder="e.g. Fresh Red Apple" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">SKU / BARCODE *</label>
+                        <input type="text" id="add-p-sku" required placeholder="e.g. 102930219" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-semibold text-gray-500">CATEGORY *</label>
+                            <button type="button" onclick="openManageCategoriesModal()" class="text-[10px] theme-red-text hover:underline font-bold">+ Create Category</button>
+                        </div>
+                        <select id="add-p-category" required class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <!-- Dynamic from app.js -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PRICE (₹) *</label>
+                        <input type="number" id="add-p-price" required min="0.01" step="0.01" placeholder="0.00" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">STOCK QUANTITY *</label>
+                        <input type="number" id="add-p-stock" required min="0" placeholder="0" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">LOW STOCK ALARM THRESHOLD *</label>
+                        <input type="number" id="add-p-minstock" required min="0" placeholder="e.g. 10" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PRODUCT PHOTO</label>
+                        <div class="flex items-center space-x-4 bg-gray-50 p-2.5 rounded-lg border">
+                            <input type="file" id="add-p-image-input" accept="image/*" class="hidden" onchange="previewImage(this, 'add-p-image-preview')">
+                            <button type="button" onclick="requestGalleryPermission('add-p-image-input')" class="theme-red-btn-outline px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1">
+                                <i class="fas fa-camera"></i>
+                                <span>Choose Photo</span>
+                            </button>
+                            <img id="add-p-image-preview" src="https://placehold.co/100x100?text=No+Photo" class="w-12 h-12 object-cover rounded-lg border bg-white shadow-sm">
+                            <button type="button" onclick="clearImagePreview('add-p-image-input', 'add-p-image-preview')" class="text-xs text-red-500 hover:underline">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t">
+                    <button type="button" onclick="closeModal('add-product-modal')" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-100">Cancel</button>
+                    <button type="submit" class="theme-red-bg hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Product Details -->
+    <div id="edit-product-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden flex flex-col">
+            <!-- Modal Header -->
+            <div class="theme-red-bg p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fas fa-edit mr-2"></i>Modify Product Details</h3>
+                <button onclick="closeModal('edit-product-modal')" class="text-white hover:text-red-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <!-- Modal Content Form -->
+            <form id="edit-product-form" class="p-6 space-y-4">
+                <!-- ID Holder (Disabled) -->
+                <input type="hidden" id="edit-p-id">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PRODUCT NAME *</label>
+                        <input type="text" id="edit-p-name" required class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">SKU / BARCODE *</label>
+                        <input type="text" id="edit-p-sku" required class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-semibold text-gray-500">CATEGORY *</label>
+                            <button type="button" onclick="openManageCategoriesModal()" class="text-[10px] theme-red-text hover:underline font-bold">+ Create Category</button>
+                        </div>
+                        <select id="edit-p-category" required class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <!-- Dynamic from app.js -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PRICE (₹) *</label>
+                        <input type="number" id="edit-p-price" required min="0.01" step="0.01" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">STOCK QUANTITY *</label>
+                        <input type="number" id="edit-p-stock" required min="0" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">LOW STOCK ALARM THRESHOLD *</label>
+                        <input type="number" id="edit-p-minstock" required min="0" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PRODUCT PHOTO</label>
+                        <div class="flex items-center space-x-4 bg-gray-50 p-2.5 rounded-lg border">
+                            <input type="file" id="edit-p-image-input" accept="image/*" class="hidden" onchange="previewImage(this, 'edit-p-image-preview')">
+                            <button type="button" onclick="requestGalleryPermission('edit-p-image-input')" class="theme-red-btn-outline px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1">
+                                <i class="fas fa-camera"></i>
+                                <span>Change Photo</span>
+                            </button>
+                            <img id="edit-p-image-preview" src="https://placehold.co/100x100?text=No+Photo" class="w-12 h-12 object-cover rounded-lg border bg-white shadow-sm">
+                            <button type="button" onclick="clearImagePreview('edit-p-image-input', 'edit-p-image-preview')" class="text-xs text-red-500 hover:underline">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t">
+                    <button type="button" onclick="closeModal('edit-product-modal')" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-100">Cancel</button>
+                    <button type="submit" class="theme-red-bg hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Printable Invoice Receipt -->
+    <div id="print-invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden flex flex-col border border-gray-200">
+            <!-- Modal Header (no-print) -->
+            <div class="theme-red-bg p-4 text-white flex justify-between items-center no-print">
+                <h3 class="font-bold text-lg"><i class="fas fa-file-alt mr-2"></i>Invoice Invoice</h3>
+                <button onclick="closeModal('print-invoice-modal')" class="text-white hover:text-red-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Invoice Body (printable section) -->
+            <div class="p-8 bg-white flex-1 flex flex-col space-y-4">
+                <!-- Store Info Branding -->
+                <div class="text-center pb-4 border-b border-dashed border-gray-300">
+                    <h2 class="text-2xl font-bold tracking-wide theme-red-text">I CONNECT</h2>
+                    <p class="text-xs text-gray-500 mt-1">Mobile Phones, Accessories & Repairing</p>
+                    <p class="text-xs text-gray-500">Mobile: 8138962026</p>
+                </div>
+
+                <!-- Transaction header meta -->
+                <div class="flex justify-between text-xs text-gray-600">
+                    <div>
+                        <p class="font-semibold text-gray-800">Invoice: <span id="invoice-no" class="font-bold">INV-0000</span></p>
+                        <p>Date: <span id="invoice-date">--/--/---- --:--</span></p>
+                    </div>
+                    <div class="text-right">
+                        <p>Customer: <span id="invoice-customer-name" class="font-semibold text-gray-800">Walk-in</span></p>
+                        <p>Mobile: <span id="invoice-customer-phone">N/A</span></p>
+                    </div>
+                </div>
+
+                <!-- Items list table -->
+                <table class="w-full text-left mt-2">
+                    <thead>
+                        <tr class="text-xs font-semibold text-gray-500 border-b border-gray-200">
+                            <th class="py-1">Item</th>
+                            <th class="py-1 text-center">Qty</th>
+                            <th class="py-1 text-right">Price</th>
+                            <th class="py-1 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoice-items" class="divide-y divide-gray-100 text-xs">
+                        <!-- Dynamic items -->
+                    </tbody>
+                </table>
+
+                <!-- Summary calculations -->
+                <div class="pt-4 border-t border-dashed border-gray-300 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal:</span>
+                        <span id="invoice-subtotal">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-red-500">
+                        <span>Discount:</span>
+                        <span id="invoice-discount">-₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Tax (5%):</span>
+                        <span id="invoice-tax">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-base font-bold text-gray-800 pt-2 border-t">
+                        <span>GRAND TOTAL:</span>
+                        <span id="invoice-total" class="theme-red-text">₹0.00</span>
+                    </div>
+                </div>
+
+                <!-- Receipt footer message -->
+                <div class="text-center pt-6 text-[10px] text-gray-400 border-t border-gray-100">
+                    <p class="font-semibold">Thank you for shopping with i connect</p>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons (no-print) -->
+            <div class="bg-gray-50 p-4 flex justify-end space-x-3 no-print border-t">
+                <button onclick="closeModal('print-invoice-modal')" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-100">Close</button>
+                <button onclick="printReceipt()" class="theme-red-bg hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2">
+                    <i class="fas fa-print"></i>
+                    <span>Print Receipt</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Gallery Permission Prompt -->
+    <div id="gallery-permission-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[60] p-4 no-print">
+        <div class="bg-white rounded-xl shadow-lg max-w-sm w-full overflow-hidden flex flex-col p-6 text-center space-y-4">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fas fa-images"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">Allow Gallery Access</h3>
+                <p class="text-sm text-gray-500 mt-2">"I CONNECT" requests permission to open your photo library/gallery to choose product pictures.</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="denyGalleryPermission()" class="flex-1 px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-100 font-medium">Don't Allow</button>
+                <button onclick="approveGalleryPermission()" class="flex-1 theme-red-bg hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">Allow</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Manage Categories -->
+    <div id="manage-categories-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full overflow-hidden flex flex-col border border-gray-200">
+            <!-- Modal Header -->
+            <div class="theme-red-bg p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fas fa-tags mr-2"></i>Manage Product Categories</h3>
+                <button onclick="closeModal('manage-categories-modal')" class="text-white hover:text-red-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6 flex flex-col space-y-4">
+                <!-- Add Category Sub-form -->
+                <form id="add-category-form" class="flex gap-2">
+                    <input type="text" id="new-category-name" required placeholder="New Category Name (e.g. Cables)" class="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <button type="submit" class="theme-red-bg hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-1">
+                        <i class="fas fa-plus"></i>
+                        <span>Add</span>
+                    </button>
+                </form>
+
+                <!-- Categories list container -->
+                <div class="border rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <th class="px-4 py-2">Category Name</th>
+                                <th class="px-4 py-2 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-list-body" class="divide-y divide-gray-100 text-sm">
+                            <!-- Dynamic category list from app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer close btn -->
+            <div class="bg-gray-50 p-4 flex justify-end no-print border-t">
+                <button onclick="closeModal('manage-categories-modal')" class="theme-red-bg hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-semibold">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Screen (Full overlay on start) -->
+    <div id="auth-screen" class="fixed inset-0 bg-red-800 flex items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col p-8 space-y-6">
+            <!-- Header Branding -->
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-3xl mb-3 shadow-inner">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h2 class="text-2xl font-bold tracking-wide text-gray-800">I CONNECT</h2>
+                <p class="text-xs text-gray-500 mt-1">Mobile Shop Billing & Sync System</p>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="auth-error" class="hidden bg-red-50 text-red-600 text-xs p-3 rounded-lg border border-red-100 font-semibold text-center">
+                Invalid credentials.
+            </div>
+
+            <!-- Forms Container -->
+            <div>
+                <!-- LOGIN FORM -->
+                <form id="login-form" class="space-y-4">
+                    <h3 class="font-bold text-gray-700 text-sm border-b pb-2 mb-3">ACCOUNT SIGN IN</h3>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">EMAIL ADDRESS</label>
+                        <input type="email" id="login-email" required placeholder="owner@iconnect.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PASSWORD</label>
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <button type="submit" class="w-full theme-red-bg hover:bg-red-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md">
+                        Log In & Sync
+                    </button>
+                    <p class="text-xs text-center text-gray-500 mt-4">
+                        Don't have a shop account? <a href="#" onclick="toggleAuthForm('signup')" class="theme-red-text font-bold hover:underline">Sign Up Now</a>
+                    </p>
+                </form>
+
+                <!-- SIGNUP FORM (Hidden by default) -->
+                <form id="signup-form" class="space-y-4 hidden">
+                    <h3 class="font-bold text-gray-700 text-sm border-b pb-2 mb-3">CREATE SHOP ACCOUNT</h3>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">SHOP OWNER NAME</label>
+                        <input type="text" id="signup-name" required placeholder="e.g. Shibi" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">EMAIL ADDRESS</label>
+                        <input type="email" id="signup-email" required placeholder="owner@iconnect.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">PASSWORD</label>
+                        <input type="password" id="signup-password" required placeholder="Minimum 6 characters" minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <button type="submit" class="w-full theme-red-bg hover:bg-red-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md">
+                        Register & Log In
+                    </button>
+                    <p class="text-xs text-center text-gray-500 mt-4">
+                        Already registered? <a href="#" onclick="toggleAuthForm('login')" class="theme-red-text font-bold hover:underline">Log In Here</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script File -->
+    <script src="app.js"></script>
+</body>
+</html>

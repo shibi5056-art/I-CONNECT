@@ -1,0 +1,6 @@
+# Local databases and runtime state
+db/
+node_modules/
+.system_generated/
+credentials.txt
+*.log

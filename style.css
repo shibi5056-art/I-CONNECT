@@ -1,0 +1,112 @@
+/* Supermarket App Custom Stylesheet */
+
+:root {
+    --primary-red: #d32f2f;
+    --primary-red-hover: #b71c1c;
+    --light-red-bg: #ffebee;
+    --border-red: #ffcdd2;
+    --text-color: #2c3e50;
+    --bg-white: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+    background-color: #f8f9fa;
+}
+
+/* Red & White Theme Custom Classes */
+.theme-red-bg {
+    background-color: var(--primary-red);
+}
+
+.theme-red-text {
+    color: var(--primary-red);
+}
+
+.theme-red-border {
+    border-color: var(--primary-red);
+}
+
+.theme-red-btn {
+    background-color: var(--primary-red);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.theme-red-btn:hover {
+    background-color: var(--primary-red-hover);
+}
+
+.theme-red-btn-outline {
+    background-color: transparent;
+    color: var(--primary-red);
+    border: 1px solid var(--primary-red);
+    transition: all 0.2s ease;
+}
+
+.theme-red-btn-outline:hover {
+    background-color: var(--light-red-bg);
+}
+
+/* Sidebar and navigation styling */
+.nav-link-active {
+    background-color: var(--light-red-bg);
+    color: var(--primary-red);
+    border-left: 4px solid var(--primary-red);
+    font-weight: 600;
+}
+
+.nav-link-inactive {
+    color: #4a5568;
+    border-left: 4px solid transparent;
+}
+
+.nav-link-inactive:hover {
+    background-color: #f3f4f6;
+    color: var(--primary-red);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-red);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-red);
+}
+
+/* Print Stylesheet */
+@media print {
+    /* Hide everything except the print-invoice-container */
+    body * {
+        visibility: hidden;
+    }
+    
+    #print-invoice-modal, #print-invoice-modal * {
+        visibility: visible;
+    }
+    
+    #print-invoice-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        background-color: white;
+    }
+    
+    /* Hide actions buttons in modal during print */
+    .no-print {
+        display: none !important;
+    }
+}
