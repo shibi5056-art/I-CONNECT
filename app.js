@@ -52,6 +52,72 @@ function toggleAuthForm(type) {
     }
 }
 
+let syncInterval = null;
+
+// Start auto synchronization polling
+function startAutoSync() {
+    stopAutoSync();
+    // Poll the server every 5 seconds for updates
+    syncInterval = setInterval(() => {
+        if (currentUser) {
+            fetchSyncedDataSilent();
+        }
+    }, 5000);
+}
+
+// Stop auto synchronization polling
+function stopAutoSync() {
+    if (syncInterval) {
+        clearInterval(syncInterval);
+        syncInterval = null;
+    }
+}
+
+// Quietly check for data updates from the server
+function fetchSyncedDataSilent() {
+    if (!currentUser) return;
+    
+    fetch('/api/sync/get', {
+        method: 'GET',
+        headers: {
+            'x-user-email': currentUser.email
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Sync failed");
+        return res.json();
+    })
+    .then(data => {
+        // Compare structure to see if any updates occurred
+        const productsChanged = JSON.stringify(data.products || []) !== JSON.stringify(products);
+        const categoriesChanged = JSON.stringify(data.categories || []) !== JSON.stringify(categories);
+        const salesChanged = JSON.stringify(data.sales || []) !== JSON.stringify(sales);
+        
+        if (productsChanged || categoriesChanged || salesChanged) {
+            // Verify user is not typing to avoid focus-hijack
+            const activeEl = document.activeElement;
+            const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA');
+            
+            // Also check if critical modals are open
+            const isAddModalOpen = !document.getElementById("add-product-modal").classList.contains("hidden");
+            const isEditModalOpen = !document.getElementById("edit-product-modal").classList.contains("hidden");
+            const isCategoryModalOpen = !document.getElementById("manage-categories-modal").classList.contains("hidden");
+            
+            if (!isTyping && !isAddModalOpen && !isEditModalOpen && !isCategoryModalOpen) {
+                products = data.products || [];
+                categories = data.categories || [];
+                sales = data.sales || [];
+                
+                initApp();
+                console.log("App data updated in real-time.");
+            }
+        }
+    })
+    .catch(err => {
+        // Silently catch network drops to avoid UI error popups
+    });
+}
+
 // Check auth state on start
 function checkAuth() {
     const email = localStorage.getItem("iconnect_user_email");
@@ -62,8 +128,9 @@ function checkAuth() {
         document.getElementById("user-display-name").innerText = `Welcome, ${name}`;
         document.getElementById("auth-screen").classList.add("hidden");
         
-        // Load data from server
+        // Load data from server and start auto sync
         loadSyncedData();
+        startAutoSync();
     } else {
         document.getElementById("auth-screen").classList.remove("hidden");
     }
@@ -180,6 +247,7 @@ function logoutUser() {
         localStorage.removeItem("iconnect_user_email");
         localStorage.removeItem("iconnect_user_name");
         currentUser = null;
+        stopAutoSync();
         
         // Reset local memory
         products = [];
