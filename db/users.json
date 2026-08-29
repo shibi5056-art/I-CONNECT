@@ -1,1 +1,97 @@
-{}
+{
+  "shibi5056@gmail.com": {
+    "name": "shibil",
+    "password": "shibil101@",
+    "products": [
+      {
+        "id": "P003",
+        "sku": "MPH003",
+        "name": "Google Pixel 8 Pro (128GB)",
+        "category": "Smartphones",
+        "price": 999,
+        "stock": 8,
+        "minStock": 2,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\" ry=\"2\"></rect><line x1=\"12\" y1=\"18\" x2=\"12.01\" y2=\"18\"></line></svg>"
+      },
+      {
+        "id": "P004",
+        "sku": "ACC001",
+        "name": "Apple AirPods Pro (2nd Gen)",
+        "category": "Audio Accessories",
+        "price": 249,
+        "stock": 25,
+        "minStock": 5,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 18v-6a9 9 0 0 1 18 0v6\"></path><path d=\"M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z\"></path></svg>"
+      },
+      {
+        "id": "P005",
+        "sku": "ACC002",
+        "name": "Sony WH-1000XM5 Wireless Headphones",
+        "category": "Audio Accessories",
+        "price": 349,
+        "stock": 10,
+        "minStock": 2,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 18v-6a9 9 0 0 1 18 0v6\"></path><path d=\"M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z\"></path></svg>"
+      },
+      {
+        "id": "P006",
+        "sku": "CHG001",
+        "name": "Super Fast Charger Adapter (25W)",
+        "category": "Chargers",
+        "price": 19.99,
+        "stock": 50,
+        "minStock": 10,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"5\" y=\"5\" width=\"14\" height=\"12\" rx=\"2\"></rect><line x1=\"9\" y1=\"17\" x2=\"9\" y2=\"21\"></line><line x1=\"15\" y1=\"17\" x2=\"15\" y2=\"21\"></line><path d=\"M12 2v3\"></path></svg>"
+      },
+      {
+        "id": "P007",
+        "sku": "CHG002",
+        "name": "Wireless Charging Pad (15W)",
+        "category": "Chargers",
+        "price": 29.99,
+        "stock": 30,
+        "minStock": 5,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"5\" y=\"5\" width=\"14\" height=\"12\" rx=\"2\"></rect><line x1=\"9\" y1=\"17\" x2=\"9\" y2=\"21\"></line><line x1=\"15\" y1=\"17\" x2=\"15\" y2=\"21\"></line><path d=\"M12 2v3\"></path></svg>"
+      },
+      {
+        "id": "P008",
+        "sku": "CBL001",
+        "name": "Braided USB-C to USB-C Cable (2m)",
+        "category": "Cables",
+        "price": 14.99,
+        "stock": 60,
+        "minStock": 15,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 13V5c0-1.1-.9-2-2-2H7C5.9 3 5 3.9 5 5v8m4 8h6M12 13v8\"></path></svg>"
+      },
+      {
+        "id": "P009",
+        "sku": "CAS001",
+        "name": "MagSafe Silicone Case for iPhone 15",
+        "category": "Cases & Covers",
+        "price": 39.99,
+        "stock": 40,
+        "minStock": 8,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"6\" y=\"3\" width=\"12\" height=\"18\" rx=\"2\" ry=\"2\"></rect><path d=\"M12 7v4m-2-2h4\"></path></svg>"
+      },
+      {
+        "id": "P010",
+        "sku": "SCR001",
+        "name": "Tempered Glass Screen Protector (iPhone/Samsung)",
+        "category": "Screen Protectors",
+        "price": 9.99,
+        "stock": 100,
+        "minStock": 20,
+        "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23d32f2f\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\"></rect><path d=\"M8 6h8M8 18h8\"></path></svg>"
+      }
+    ],
+    "categories": [
+      "Smartphones",
+      "Audio Accessories",
+      "Chargers",
+      "Cables",
+      "Cases & Covers",
+      "Screen Protectors"
+    ],
+    "sales": []
+  }
+}
