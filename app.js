@@ -80,7 +80,8 @@ function fetchSyncedDataSilent() {
     fetch('/api/sync/get', {
         method: 'GET',
         headers: {
-            'x-user-email': currentUser.email
+            'x-user-email': currentUser.email,
+            'X-Pinggy-No-Screen': 'true'
         }
     })
     .then(res => {
@@ -143,7 +144,8 @@ function loadSyncedData() {
     fetch('/api/sync/get', {
         method: 'GET',
         headers: {
-            'x-user-email': currentUser.email
+            'x-user-email': currentUser.email,
+            'X-Pinggy-No-Screen': 'true'
         }
     })
     .then(res => {
@@ -184,7 +186,8 @@ function saveSyncedData() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-user-email': currentUser.email
+            'x-user-email': currentUser.email,
+            'X-Pinggy-No-Screen': 'true'
         },
         body: JSON.stringify({ products, categories, sales })
     })
@@ -276,7 +279,10 @@ function setupAuthListeners() {
         
         fetch('/api/auth/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Pinggy-No-Screen': 'true'
+            },
             body: JSON.stringify({ email, password })
         })
         .then(res => res.json())
@@ -308,7 +314,10 @@ function setupAuthListeners() {
         
         fetch('/api/auth/signup', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Pinggy-No-Screen': 'true'
+            },
             body: JSON.stringify({ name, email, password })
         })
         .then(res => res.json())
