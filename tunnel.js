@@ -16,11 +16,24 @@ const LOG_FILE = path.join(__dirname, 'db', 'localtunnel.log');
 
     tunnel.on('close', () => {
       console.log('Tunnel closed');
-      if (fs.existsSync(LOG_FILE)) {
-        fs.unlinkSync(LOG_FILE);
-      }
+      cleanup();
+      process.exit(0);
     });
+
+    // Keep the Node.js process alive indefinitely
+    setInterval(() => {}, 1000 * 60 * 60);
+
   } catch (err) {
     console.error('Error starting tunnel:', err);
+    cleanup();
+    process.exit(1);
   }
 })();
+
+function cleanup() {
+  if (fs.existsSync(LOG_FILE)) {
+    try {
+      fs.unlinkSync(LOG_FILE);
+    } catch (e) {}
+  }
+}
