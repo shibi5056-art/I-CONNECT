@@ -345,6 +345,13 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAuth();
     setupEventListeners();
     switchTab("dashboard");
+    
+    // Register Service Worker to automatically bypass Pinggy warning page on subsequent visits
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('Pinggy Warning Bypass Service Worker registered.'))
+            .catch(err => console.warn('Service Worker registration failed:', err));
+    }
 });
 
 function initApp() {
