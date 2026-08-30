@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Pinggy Warning Bypasser",
+  "version": "1.0",
+  "description": "Automatically injects X-Pinggy-No-Screen header to bypass free tunnel warnings.",
+  "permissions": [
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "*://*.pinggy-free.link/*",
+    "*://*.pinggy.net/*"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
+}

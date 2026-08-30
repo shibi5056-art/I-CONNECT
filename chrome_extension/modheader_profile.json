@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Pinggy Warning Bypass",
+    "hide": false,
+    "headers": [
+      {
+        "enabled": true,
+        "name": "X-Pinggy-No-Screen",
+        "value": "true",
+        "comment": "Bypass Pinggy Free warning landing page"
+      }
+    ],
+    "filters": [
+      {
+        "enabled": true,
+        "type": "urls",
+        "value": ".*\\.pinggy-free\\.link.*|.*\\.pinggy\\.net.*"
+      }
+    ],
+    "respHeaders": [],
+    "filtersSupported": true
+  }
+]
