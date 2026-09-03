@@ -54,9 +54,33 @@ function toggleAuthForm(type) {
 
 let syncInterval = null;
 
+// Dynamic status badge updater
+function updateSyncStatus(status) {
+    const badge = document.getElementById("sync-status-badge");
+    const dot = document.getElementById("sync-status-dot");
+    const text = document.getElementById("sync-status-text");
+    if (!badge || !dot || !text) return;
+
+    if (status === "synced") {
+        badge.className = "px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 flex items-center space-x-1.5 transition-all";
+        dot.className = "h-2 w-2 bg-green-500 rounded-full animate-pulse";
+        text.innerText = "Cloud Synced";
+    } else if (status === "syncing") {
+        badge.className = "px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 flex items-center space-x-1.5 transition-all";
+        dot.className = "h-2 w-2 bg-blue-500 rounded-full animate-ping";
+        text.innerText = "Syncing...";
+    } else if (status === "offline") {
+        badge.className = "px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 flex items-center space-x-1.5 transition-all";
+        dot.className = "h-2 w-2 bg-amber-500 rounded-full";
+        text.innerText = "Offline Cache";
+    }
+}
+
 // Start auto synchronization polling
 function startAutoSync() {
     stopAutoSync();
+    // Immediate check
+    fetchSyncedDataSilent();
     // Poll the server every 5 seconds for updates
     syncInterval = setInterval(() => {
         if (currentUser) {
@@ -89,6 +113,7 @@ function fetchSyncedDataSilent() {
         return res.json();
     })
     .then(data => {
+        updateSyncStatus("synced");
         // Compare structure to see if any updates occurred
         const productsChanged = JSON.stringify(data.products || []) !== JSON.stringify(products);
         const categoriesChanged = JSON.stringify(data.categories || []) !== JSON.stringify(categories);
@@ -115,9 +140,27 @@ function fetchSyncedDataSilent() {
         }
     })
     .catch(err => {
+        updateSyncStatus("offline");
         // Silently catch network drops to avoid UI error popups
     });
 }
+
+// Immediate sync on mobile/desktop wakeups and network changes
+window.addEventListener("online", () => {
+    updateSyncStatus("syncing");
+    fetchSyncedDataSilent();
+});
+window.addEventListener("offline", () => {
+    updateSyncStatus("offline");
+});
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        fetchSyncedDataSilent();
+    }
+});
+window.addEventListener("focus", () => {
+    fetchSyncedDataSilent();
+});
 
 // Check auth state on start
 function checkAuth() {
@@ -366,6 +409,7 @@ function initApp() {
 // --- Tab Switching ---
 function switchTab(tabId) {
     activeTab = tabId;
+    fetchSyncedDataSilent();
     
     // Hide all tabs
     document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
