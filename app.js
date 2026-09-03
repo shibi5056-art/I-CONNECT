@@ -53,6 +53,7 @@ function toggleAuthForm(type) {
 }
 
 let syncInterval = null;
+let isSyncing = false;
 
 // Dynamic status badge updater
 function updateSyncStatus(status) {
@@ -76,15 +77,157 @@ function updateSyncStatus(status) {
     }
 }
 
+// Smart Bidirectional Merge Algorithms
+function mergeProducts(localList, serverList) {
+    const productMap = new Map();
+    // Add server products first
+    (serverList || []).forEach(p => {
+        if (p && p.id) productMap.set(p.id, p);
+    });
+    // Merge local products (keep local if newer or not on server)
+    (localList || []).forEach(p => {
+        if (p && p.id) {
+            const existing = productMap.get(p.id);
+            if (!existing || (p.updatedAt || 0) >= (existing.updatedAt || 0)) {
+                productMap.set(p.id, p);
+            }
+        }
+    });
+    return Array.from(productMap.values());
+}
+
+function mergeSales(localList, serverList) {
+    const salesMap = new Map();
+    (serverList || []).forEach(s => {
+        const key = s.id || s.invoiceNo;
+        if (key) salesMap.set(key, s);
+    });
+    (localList || []).forEach(s => {
+        const key = s.id || s.invoiceNo;
+        if (key) salesMap.set(key, s);
+    });
+    return Array.from(salesMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function mergeCategories(localList, serverList) {
+    return [...new Set([...(serverList || []), ...(localList || [])])];
+}
+
+// Perform full bidirectional sync (pull updates from other phones, push offline changes)
+function performFullSync() {
+    if (!currentUser || isSyncing) return;
+    isSyncing = true;
+    updateSyncStatus("syncing");
+
+    const hasPendingLocalChanges = localStorage.getItem("iconnect_pending_sync") === "true";
+
+    fetch('/api/sync/get', {
+        method: 'GET',
+        headers: {
+            'x-user-email': currentUser.email,
+            'X-Pinggy-No-Screen': 'true'
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Sync probe failed");
+        return res.json();
+    })
+    .then(serverData => {
+        const serverProducts = serverData.products || [];
+        const serverCategories = serverData.categories || [];
+        const serverSales = serverData.sales || [];
+
+        let shouldUpload = false;
+        let shouldRedraw = false;
+
+        if (hasPendingLocalChanges) {
+            // Merge offline local changes with any new changes from other phones
+            const mergedProducts = mergeProducts(products, serverProducts);
+            const mergedCategories = mergeCategories(categories, serverCategories);
+            const mergedSales = mergeSales(sales, serverSales);
+
+            products = mergedProducts;
+            categories = mergedCategories;
+            sales = mergedSales;
+
+            shouldUpload = true;
+            shouldRedraw = true;
+        } else {
+            // No offline changes locally: Check if other phones updated data
+            const productsChanged = JSON.stringify(serverProducts) !== JSON.stringify(products);
+            const categoriesChanged = JSON.stringify(serverCategories) !== JSON.stringify(categories);
+            const salesChanged = JSON.stringify(serverSales) !== JSON.stringify(sales);
+
+            if (productsChanged || categoriesChanged || salesChanged) {
+                if (products.length === 0 && serverProducts.length === 0) {
+                    products = [...DEMO_PRODUCTS];
+                    categories = [...new Set(DEMO_PRODUCTS.map(p => p.category))];
+                    sales = [];
+                    shouldUpload = true;
+                } else {
+                    products = serverProducts;
+                    categories = serverCategories;
+                    sales = serverSales;
+                }
+                shouldRedraw = true;
+            }
+        }
+
+        // Cache latest merged state locally for offline use
+        saveLocalFallback();
+
+        if (shouldUpload) {
+            // Upload merged state to cloud server so all other devices receive updates
+            return fetch('/api/sync/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-email': currentUser.email,
+                    'X-Pinggy-No-Screen': 'true'
+                },
+                body: JSON.stringify({ products, categories, sales })
+            }).then(saveRes => {
+                if (saveRes.ok) {
+                    localStorage.removeItem("iconnect_pending_sync");
+                    updateSyncStatus("synced");
+                }
+            });
+        } else {
+            updateSyncStatus("synced");
+        }
+
+        // Only redraw if user is not actively editing inputs or modals
+        const activeEl = document.activeElement;
+        const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA');
+        const isAddModalOpen = !document.getElementById("add-product-modal").classList.contains("hidden");
+        const isEditModalOpen = !document.getElementById("edit-product-modal").classList.contains("hidden");
+        const isCategoryModalOpen = !document.getElementById("manage-categories-modal").classList.contains("hidden");
+
+        if (shouldRedraw && !isTyping && !isAddModalOpen && !isEditModalOpen && !isCategoryModalOpen) {
+            initApp();
+            console.log("App data synchronized across devices.");
+        }
+    })
+    .catch(err => {
+        updateSyncStatus("offline");
+    })
+    .finally(() => {
+        isSyncing = false;
+    });
+}
+
+function fetchSyncedDataSilent() {
+    performFullSync();
+}
+
 // Start auto synchronization polling
 function startAutoSync() {
     stopAutoSync();
-    // Immediate check
-    fetchSyncedDataSilent();
+    performFullSync();
     // Poll the server every 5 seconds for updates
     syncInterval = setInterval(() => {
         if (currentUser) {
-            fetchSyncedDataSilent();
+            performFullSync();
         }
     }, 5000);
 }
@@ -97,69 +240,21 @@ function stopAutoSync() {
     }
 }
 
-// Quietly check for data updates from the server
-function fetchSyncedDataSilent() {
-    if (!currentUser) return;
-    
-    fetch('/api/sync/get', {
-        method: 'GET',
-        headers: {
-            'x-user-email': currentUser.email,
-            'X-Pinggy-No-Screen': 'true'
-        }
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Sync failed");
-        return res.json();
-    })
-    .then(data => {
-        updateSyncStatus("synced");
-        // Compare structure to see if any updates occurred
-        const productsChanged = JSON.stringify(data.products || []) !== JSON.stringify(products);
-        const categoriesChanged = JSON.stringify(data.categories || []) !== JSON.stringify(categories);
-        const salesChanged = JSON.stringify(data.sales || []) !== JSON.stringify(sales);
-        
-        if (productsChanged || categoriesChanged || salesChanged) {
-            // Verify user is not typing to avoid focus-hijack
-            const activeEl = document.activeElement;
-            const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA');
-            
-            // Also check if critical modals are open
-            const isAddModalOpen = !document.getElementById("add-product-modal").classList.contains("hidden");
-            const isEditModalOpen = !document.getElementById("edit-product-modal").classList.contains("hidden");
-            const isCategoryModalOpen = !document.getElementById("manage-categories-modal").classList.contains("hidden");
-            
-            if (!isTyping && !isAddModalOpen && !isEditModalOpen && !isCategoryModalOpen) {
-                products = data.products || [];
-                categories = data.categories || [];
-                sales = data.sales || [];
-                
-                initApp();
-                console.log("App data updated in real-time.");
-            }
-        }
-    })
-    .catch(err => {
-        updateSyncStatus("offline");
-        // Silently catch network drops to avoid UI error popups
-    });
-}
-
 // Immediate sync on mobile/desktop wakeups and network changes
 window.addEventListener("online", () => {
     updateSyncStatus("syncing");
-    fetchSyncedDataSilent();
+    performFullSync();
 });
 window.addEventListener("offline", () => {
     updateSyncStatus("offline");
 });
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-        fetchSyncedDataSilent();
+        performFullSync();
     }
 });
 window.addEventListener("focus", () => {
-    fetchSyncedDataSilent();
+    performFullSync();
 });
 
 // Check auth state on start
@@ -172,59 +267,31 @@ function checkAuth() {
         document.getElementById("user-display-name").innerText = `Welcome, ${name}`;
         document.getElementById("auth-screen").classList.add("hidden");
         
-        // Load data from server and start auto sync
-        loadSyncedData();
+        // Load local cache immediately so UI shows instantly
+        loadLocalFallback();
+        // Trigger full sync and background polling
         startAutoSync();
     } else {
         document.getElementById("auth-screen").classList.remove("hidden");
     }
 }
 
-// Fetch synced data from server
 function loadSyncedData() {
-    if (!currentUser) return;
-    
-    fetch('/api/sync/get', {
-        method: 'GET',
-        headers: {
-            'x-user-email': currentUser.email,
-            'X-Pinggy-No-Screen': 'true'
-        }
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Sync failed");
-        return res.json();
-    })
-    .then(data => {
-        // If server data is empty, seed it with defaults
-        if (!data.products || data.products.length === 0) {
-            products = [...DEMO_PRODUCTS];
-            categories = [...new Set(DEMO_PRODUCTS.map(p => p.category))];
-            sales = [];
-            saveSyncedData(); // Upload seeded defaults
-        } else {
-            products = data.products || [];
-            categories = data.categories || [];
-            sales = data.sales || [];
-        }
-        initApp();
-    })
-    .catch(err => {
-        console.warn("Offline fallback: Loading local storage data.", err);
-        loadLocalFallback();
-    });
+    performFullSync();
 }
 
-// Send synced data back to server
+// Send synced data back to server with offline fallback & queue
 function saveSyncedData() {
-    if (!currentUser) {
-        saveLocalFallback();
-        return;
-    }
-    
-    // Save locally as fallback
+    // 1. Immediately save to local offline cache
     saveLocalFallback();
-    
+    // 2. Mark pending sync flag
+    localStorage.setItem("iconnect_pending_sync", "true");
+
+    if (!currentUser) return;
+
+    updateSyncStatus("syncing");
+
+    // 3. Attempt cloud upload
     fetch('/api/sync/save', {
         method: 'POST',
         headers: {
@@ -235,9 +302,17 @@ function saveSyncedData() {
         body: JSON.stringify({ products, categories, sales })
     })
     .then(res => {
-        if (!res.ok) console.warn("Failed to sync updates to server.");
+        if (res.ok) {
+            localStorage.removeItem("iconnect_pending_sync");
+            updateSyncStatus("synced");
+        } else {
+            updateSyncStatus("offline");
+        }
     })
-    .catch(err => console.warn("Connection lost. Data saved locally.", err));
+    .catch(err => {
+        updateSyncStatus("offline");
+        console.warn("Device offline. Changes queued for automatic sync when network is restored.");
+    });
 }
 
 // Local fallback database operations (keeps working offline)
@@ -652,7 +727,7 @@ document.getElementById("add-product-form").addEventListener("submit", (e) => {
         image = getDefaultImageByCategory(category);
     }
 
-    products.push({ id, sku, name, category, price, stock, minStock, image });
+    products.push({ id, sku, name, category, price, stock, minStock, image, updatedAt: Date.now() });
     saveProducts();
     
     // Close modal & reset form
@@ -710,6 +785,7 @@ document.getElementById("edit-product-form").addEventListener("submit", (e) => {
         image = getDefaultImageByCategory(products[index].category);
     }
     products[index].image = image;
+    products[index].updatedAt = Date.now();
 
     saveProducts();
     closeModal("edit-product-modal");
@@ -939,6 +1015,7 @@ function processCheckout() {
         const prod = products.find(p => p.id === item.product.id);
         if (prod) {
             prod.stock = Math.max(0, prod.stock - item.quantity);
+            prod.updatedAt = Date.now();
         }
     });
 
