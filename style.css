@@ -110,3 +110,131 @@ body {
         display: none !important;
     }
 }
+
+/* Dedicated Barcode Print Layout */
+@media print {
+    body.printing-barcode * {
+        visibility: hidden !important;
+    }
+    body.printing-barcode #barcode-print-area,
+    body.printing-barcode #barcode-print-area * {
+        visibility: visible !important;
+    }
+    body.printing-barcode #barcode-print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 6mm;
+        background: #ffffff !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6mm;
+    }
+    body.printing-barcode .barcode-print-item {
+        border: 1px dashed #b0b0b0;
+        border-radius: 6px;
+        padding: 8px 10px;
+        background: #ffffff !important;
+        text-align: center;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    body.printing-barcode .barcode-print-item svg {
+        max-width: 100%;
+        height: auto;
+    }
+    body.printing-barcode .no-print {
+        display: none !important;
+    }
+}
+
+/* Dedicated Business Report Print Layout */
+@media print {
+    body.printing-report * {
+        visibility: hidden !important;
+    }
+    body.printing-report #reports-tab,
+    body.printing-report #reports-tab * {
+        visibility: visible !important;
+    }
+    body.printing-report #reports-tab {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 15px;
+        background: white !important;
+        display: block !important;
+    }
+    body.printing-report .no-print {
+        display: none !important;
+    }
+}
+
+/* 1080 × 1080 px Enlarged Product Image Modal Canvas */
+.product-image-1080-canvas {
+    width: 1080px;
+    height: 1080px;
+    max-width: min(1080px, 88vw);
+    max-height: min(1080px, 72vh);
+    aspect-ratio: 1 / 1;
+}
+
+/* Customer Account Ledger Print Layout */
+@media print {
+    body.printing-ledger * {
+        visibility: hidden !important;
+    }
+    body.printing-ledger #customer-ledger-printable-area,
+    body.printing-ledger #customer-ledger-printable-area * {
+        visibility: visible !important;
+    }
+    body.printing-ledger #customer-ledger-printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 15px;
+        background: white !important;
+        display: block !important;
+    }
+    body.printing-ledger .no-print {
+        display: none !important;
+    }
+}
+
+/* Payment Settlement Receipt Print Layout */
+@media print {
+    body.printing-settlement-receipt * {
+        visibility: hidden !important;
+    }
+    body.printing-settlement-receipt #settlement-receipt-printable-area,
+    body.printing-settlement-receipt #settlement-receipt-printable-area * {
+        visibility: visible !important;
+    }
+    body.printing-settlement-receipt #settlement-receipt-printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 10px;
+        background: white !important;
+        display: block !important;
+    }
+    body.printing-settlement-receipt .no-print {
+        display: none !important;
+    }
+}
+
+
+

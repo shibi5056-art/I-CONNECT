@@ -1,7 +1,10 @@
-services:
+﻿services:
   - type: web
-    name: i-connect-mobile-shop
-    env: node
+    name: iconnect-mobile-pos
+    runtime: node
     plan: free
-    buildCommand: ""
+    buildCommand: npm install
     startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
