@@ -2193,5 +2193,314 @@
       }
     ],
     "version": 2
+  },
+  "guard_test_1791038483607@store.com": {
+    "storeName": "Elite Gadgets Hub",
+    "storeRole": "Electronics & POS",
+    "place": "HiTech City",
+    "mobile": "9876500001",
+    "additionalMobile": "",
+    "gst": "",
+    "email": "guard_test_1791038483607@store.com",
+    "password": "MyStorePassword999",
+    "activeDevices": [
+      {
+        "deviceId": "dev_1791038483607",
+        "deviceName": "Owner Workstation",
+        "loginTime": 1791038483675,
+        "lastActive": 1791038483693
+      }
+    ],
+    "products": [
+      {
+        "id": "P1",
+        "sku": "SKU1",
+        "name": "Flagship Phone",
+        "category": "Phones",
+        "purchaseRate": 50000,
+        "price": 65000,
+        "stock": 10,
+        "minStock": 2
+      }
+    ],
+    "categories": [
+      "Phones"
+    ],
+    "sales": [],
+    "customers": [],
+    "customerPassword": "MobileResetPass999!",
+    "version": 1
+  },
+  "test_owner_1791038496288@store.com": {
+    "storeName": "Super Mobile Tech",
+    "storeRole": "Smartphones & Gadgets",
+    "place": "Market Junction",
+    "mobile": "9876543210",
+    "additionalMobile": "9876543211",
+    "gst": "32ABCDE1234F1Z5",
+    "email": "test_owner_1791038496288@store.com",
+    "password": "OwnerPassword123",
+    "activeDevices": [
+      {
+        "deviceId": "dev_1791038496288",
+        "deviceName": "Owner POS Console",
+        "loginTime": 1791038496353,
+        "lastActive": 1791038496395
+      }
+    ],
+    "products": [],
+    "categories": [],
+    "sales": [
+      {
+        "id": "S1",
+        "invoiceNo": "INV-DEBIT-001",
+        "total": 1200,
+        "transactionType": "Debit",
+        "customerPhone": "9123456780",
+        "customerName": "Rahul Sharma"
+      },
+      {
+        "id": "S2",
+        "invoiceNo": "INV-CREDIT-002",
+        "total": 850,
+        "transactionType": "Credit",
+        "customerPhone": "9123456781",
+        "customerName": "Ananya Patel"
+      }
+    ],
+    "customers": [
+      {
+        "id": "CUST_001",
+        "name": "Rahul Sharma",
+        "phone": "9123456780",
+        "place": "Downtown",
+        "outstandingBalance": 1200,
+        "totalDebitBilled": 1200,
+        "totalCreditBilled": 0,
+        "totalPaid": 0,
+        "bills": [
+          {
+            "invoiceNo": "INV-DEBIT-001",
+            "date": "2026-10-03T14:41:36.392Z",
+            "total": 1200,
+            "transactionType": "Debit",
+            "status": "Due"
+          }
+        ]
+      },
+      {
+        "id": "CUST_002",
+        "name": "Ananya Patel",
+        "phone": "9123456781",
+        "place": "Uptown",
+        "outstandingBalance": 0,
+        "totalDebitBilled": 0,
+        "totalCreditBilled": 850,
+        "totalPaid": 850,
+        "bills": [
+          {
+            "invoiceNo": "INV-CREDIT-002",
+            "date": "2026-10-03T14:41:36.394Z",
+            "total": 850,
+            "transactionType": "Credit",
+            "status": "Paid"
+          }
+        ]
+      }
+    ],
+    "customerPassword": "NewCustPass2027!",
+    "version": 3,
+    "deltaLog": [
+      {
+        "version": 2,
+        "action": "CUSTOMER_PASSWORD_UPDATED",
+        "payload": {
+          "customerPassword": "NewCustPass2027!"
+        },
+        "sourceDeviceId": "dev_1791038496288",
+        "timestamp": 1791038496388
+      }
+    ]
+  },
+  "delta_sync_test_1791038496587@iconnect.test": {
+    "storeName": "Fast Sync Mobile Mart",
+    "storeRole": "Main Store",
+    "place": "Kozhikode",
+    "mobile": "9845012345",
+    "additionalMobile": "9845099999",
+    "gst": "32ABCDE1234F1Z5",
+    "email": "delta_sync_test_1791038496587@iconnect.test",
+    "password": "Password123!",
+    "activeDevices": [
+      {
+        "deviceId": "dev_1",
+        "deviceName": "Billing Terminal 1 (Cashier Counter)",
+        "loginTime": 1791038496604,
+        "lastActive": 1791038496778
+      }
+    ],
+    "products": [
+      {
+        "id": "P-101",
+        "sku": "SKU101",
+        "name": "iPhone 16 Pro 128GB",
+        "category": "Smartphones",
+        "price": 119900,
+        "stock": 14,
+        "purchaseRate": 98000,
+        "updatedAt": 1791038496778
+      },
+      {
+        "id": "P-102",
+        "sku": "SKU102",
+        "name": "Samsung Galaxy S24 Ultra",
+        "category": "Smartphones",
+        "price": 129999,
+        "stock": 10,
+        "purchaseRate": 105000
+      },
+      {
+        "id": "P-103",
+        "sku": "SKU103",
+        "name": "AirPods Pro 2",
+        "category": "Audio",
+        "price": 24900,
+        "stock": 25,
+        "purchaseRate": 18000
+      }
+    ],
+    "categories": [
+      "Smartphones",
+      "Audio",
+      "Accessories"
+    ],
+    "sales": [
+      {
+        "id": "INV-DELTA-001",
+        "invoiceNo": "INV-DELTA-001",
+        "date": "2026-10-03T14:41:36.767Z",
+        "customerName": "Mohamed Tariq",
+        "customerPhone": "9845012345",
+        "transactionType": "Credit",
+        "isCreditBill": true,
+        "items": [
+          {
+            "id": "P-101",
+            "sku": "SKU101",
+            "name": "iPhone 16 Pro 128GB",
+            "quantity": 1,
+            "price": 119900,
+            "total": 119900
+          }
+        ],
+        "subtotal": 119900,
+        "discount": 0,
+        "tax": 0,
+        "total": 119900
+      }
+    ],
+    "customers": [
+      {
+        "id": "CUST-TARIQ-01",
+        "name": "Mohamed Tariq",
+        "phone": "9845012345",
+        "place": "Kozhikode",
+        "totalCreditBilled": 119900,
+        "totalDebitBilled": 0,
+        "totalPaid": 50000,
+        "outstandingBalance": 69900,
+        "updatedAt": 1791038496894,
+        "settlements": [
+          {
+            "id": "SET-TEST-99",
+            "receiptNo": "REC-1001",
+            "date": "2026-10-03T14:41:36.893Z",
+            "amount": 50000,
+            "paymentMode": "UPI / GPay",
+            "remainingBalance": 69900
+          }
+        ]
+      }
+    ],
+    "version": 3,
+    "deltaLog": [
+      {
+        "version": 2,
+        "action": "SALE_CREATED",
+        "payload": {
+          "sale": {
+            "id": "INV-DELTA-001",
+            "invoiceNo": "INV-DELTA-001",
+            "date": "2026-10-03T14:41:36.767Z",
+            "customerName": "Mohamed Tariq",
+            "customerPhone": "9845012345",
+            "transactionType": "Credit",
+            "isCreditBill": true,
+            "items": [
+              {
+                "id": "P-101",
+                "sku": "SKU101",
+                "name": "iPhone 16 Pro 128GB",
+                "quantity": 1,
+                "price": 119900,
+                "total": 119900
+              }
+            ],
+            "subtotal": 119900,
+            "discount": 0,
+            "tax": 0,
+            "total": 119900
+          },
+          "stockUpdates": [
+            {
+              "id": "P-101",
+              "stock": 14
+            }
+          ],
+          "customerUpdate": {
+            "id": "CUST-TARIQ-01",
+            "name": "Mohamed Tariq",
+            "phone": "9845012345",
+            "place": "Kozhikode",
+            "totalCreditBilled": 119900,
+            "totalDebitBilled": 0,
+            "totalPaid": 50000,
+            "outstandingBalance": 69900,
+            "updatedAt": 1791038496894,
+            "settlements": [
+              {
+                "id": "SET-TEST-99",
+                "receiptNo": "REC-1001",
+                "date": "2026-10-03T14:41:36.893Z",
+                "amount": 50000,
+                "paymentMode": "UPI / GPay",
+                "remainingBalance": 69900
+              }
+            ]
+          }
+        },
+        "sourceDeviceId": "dev_1",
+        "timestamp": 1791038496778
+      },
+      {
+        "version": 3,
+        "action": "PAYMENT_SETTLED",
+        "payload": {
+          "customerId": "CUST-TARIQ-01",
+          "settlement": {
+            "id": "SET-TEST-99",
+            "receiptNo": "REC-1001",
+            "date": "2026-10-03T14:41:36.893Z",
+            "amount": 50000,
+            "paymentMode": "UPI / GPay",
+            "remainingBalance": 69900
+          },
+          "outstandingBalance": 69900,
+          "totalPaid": 50000
+        },
+        "sourceDeviceId": "dev_3",
+        "timestamp": 1791038496894
+      }
+    ]
   }
 }

@@ -563,6 +563,70 @@ const server = http.createServer((req, res) => {
                         user: storeProfile
                     }));
 
+                } else if (req.url === '/api/auth/reset-custom-password') {
+                    const { email, verification, newCustomPassword } = body;
+                    let normalizedEmail = (email || '').toLowerCase().trim();
+                    let targetUser = null;
+
+                    if (normalizedEmail && db[normalizedEmail]) {
+                        targetUser = db[normalizedEmail];
+                    } else {
+                        const cleanVerification = (verification || '').trim().toLowerCase();
+                        const emails = Object.keys(db);
+                        for (const em of emails) {
+                            const u = db[em];
+                            if (u && (
+                                u.password === verification ||
+                                (u.mobile && u.mobile.replace(/[^0-9]/g, '') === cleanVerification.replace(/[^0-9]/g, '')) ||
+                                (u.additionalMobile && u.additionalMobile.replace(/[^0-9]/g, '') === cleanVerification.replace(/[^0-9]/g, ''))
+                            )) {
+                                targetUser = u;
+                                normalizedEmail = em;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!targetUser) {
+                        res.writeHead(400);
+                        res.end(JSON.stringify({ error: 'Store account not found for verification.' }));
+                        return;
+                    }
+
+                    const cleanVerify = (verification || '').trim();
+                    const isPasswordMatch = targetUser.password === cleanVerify;
+                    const cleanPhone = cleanVerify.replace(/[^0-9]/g, '');
+                    const isMobileMatch = (targetUser.mobile && targetUser.mobile.replace(/[^0-9]/g, '') === cleanPhone) ||
+                                          (targetUser.additionalMobile && targetUser.additionalMobile.replace(/[^0-9]/g, '') === cleanPhone);
+
+                    if (!isPasswordMatch && (!cleanPhone || cleanPhone.length < 10 || !isMobileMatch)) {
+                        res.writeHead(401);
+                        res.end(JSON.stringify({ error: 'Invalid store password or registered mobile number.' }));
+                        return;
+                    }
+
+                    if (!newCustomPassword || !newCustomPassword.trim()) {
+                        res.writeHead(400);
+                        res.end(JSON.stringify({ error: 'New custom password cannot be blank.' }));
+                        return;
+                    }
+
+                    targetUser.customerPassword = newCustomPassword.trim();
+                    writeUsersDB(db);
+
+                    broadcastSyncEvent(normalizedEmail, {
+                        type: 'DELTA_SYNC',
+                        action: 'CUSTOMER_PASSWORD_UPDATED',
+                        payload: { customerPassword: targetUser.customerPassword }
+                    });
+
+                    res.writeHead(200);
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: 'Custom password reset successfully.',
+                        customerPassword: targetUser.customerPassword
+                    }));
+
                 } else if (req.url === '/api/auth/logout') {
                     const { email, deviceId } = body;
                     const normalizedEmail = (email || '').toLowerCase().trim();

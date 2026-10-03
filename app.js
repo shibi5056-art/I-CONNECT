@@ -1665,8 +1665,10 @@ function initApp() {
     renderCustomerDetailsSection();
 }
 
+let pendingUnlockTab = null;
+
 // --- Tab Switching ---
-function switchTab(tabId) {
+function switchTab(tabId, bypassAuth = false) {
     let effectiveTab = tabId;
     if (tabId === "customer-credit") {
         effectiveTab = "customer-details";
@@ -1674,6 +1676,20 @@ function switchTab(tabId) {
     if (currentUserRole === "customer" && effectiveTab !== "products" && effectiveTab !== "reports") {
         effectiveTab = "products";
     }
+
+    // Custom Password Protection for Product Inventory & Reports
+    if ((effectiveTab === "products" || effectiveTab === "reports") && !bypassAuth) {
+        if (activeTab !== effectiveTab) {
+            if (customerPassword && customerPassword.trim()) {
+                openCustomPasswordChallenge(effectiveTab);
+                return;
+            } else {
+                openSetCustomerPasswordModal(effectiveTab);
+                return;
+            }
+        }
+    }
+
     activeTab = effectiveTab;
     fetchSyncedDataSilent();
     
@@ -5437,6 +5453,8 @@ function togglePasswordVisibility(inputId, btnEl) {
     }
 }
 
+let postPasswordCreationTargetTab = null;
+
 function updateCustomerPasswordModalStatus() {
     const banner = document.getElementById("customer-password-status-banner");
     const input = document.getElementById("input-customer-password");
@@ -5444,21 +5462,22 @@ function updateCustomerPasswordModalStatus() {
     if (banner) {
         if (customerPassword && customerPassword.trim()) {
             banner.className = "text-xs p-2.5 rounded-xl border bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center space-x-2";
-            banner.innerHTML = `<i class="fas fa-check-circle text-emerald-600"></i><span>Customer password is configured and active.</span>`;
+            banner.innerHTML = `<i class="fas fa-check-circle text-emerald-600"></i><span>Custom password is configured and active.</span>`;
             banner.classList.remove("hidden");
         } else {
             banner.className = "text-xs p-2.5 rounded-xl border bg-amber-50 text-amber-800 border-amber-200 flex items-center space-x-2";
-            banner.innerHTML = `<i class="fas fa-exclamation-triangle text-amber-600"></i><span>No password configured. Customers cannot log in until a password is set.</span>`;
+            banner.innerHTML = `<i class="fas fa-exclamation-triangle text-amber-600"></i><span>No custom password configured. Create one to protect Product Inventory and Reports.</span>`;
             banner.classList.remove("hidden");
         }
     }
 }
 
-function openSetCustomerPasswordModal() {
+function openSetCustomerPasswordModal(targetTab = null) {
     if (currentUserRole === 'customer') {
-        alert("Only store owners can configure customer access passwords.");
+        alert("Only store owners can configure custom access passwords.");
         return;
     }
+    postPasswordCreationTargetTab = targetTab;
     updateCustomerPasswordModalStatus();
     openModal("set-customer-password-modal");
 }
@@ -5467,7 +5486,7 @@ function saveCustomerPassword() {
     const input = document.getElementById("input-customer-password");
     const val = input ? input.value.trim() : "";
     if (!val) {
-        alert("Please enter a valid password for customer access.");
+        alert("Please enter a valid password for custom access.");
         return;
     }
     customerPassword = val;
@@ -5475,22 +5494,28 @@ function saveCustomerPassword() {
     saveSyncedData();
     dispatchDeltaSync("CUSTOMER_PASSWORD_UPDATED", { customerPassword });
     updateCustomerPasswordModalStatus();
-    alert("Customer password saved successfully! Customers can now log in using this password to view Product Inventory and Reports.");
+    alert("Custom password saved successfully! Product Inventory and Reports are now protected with this password.");
     closeModal("set-customer-password-modal");
+
+    if (postPasswordCreationTargetTab) {
+        const dest = postPasswordCreationTargetTab;
+        postPasswordCreationTargetTab = null;
+        switchTab(dest, true);
+    }
 }
 
 function clearCustomerPassword() {
     if (!customerPassword) {
-        alert("No customer password is currently configured.");
+        alert("No custom password is currently configured.");
         return;
     }
-    if (confirm("Are you sure you want to remove the customer access password? Customers will not be able to log in until a new password is set.")) {
+    if (confirm("Are you sure you want to remove the custom access password? Product Inventory and Reports will no longer be password-protected.")) {
         customerPassword = "";
         localStorage.removeItem("iconnect_customer_password");
         saveSyncedData();
         dispatchDeltaSync("CUSTOMER_PASSWORD_UPDATED", { customerPassword: "" });
         updateCustomerPasswordModalStatus();
-        alert("Customer password has been removed.");
+        alert("Custom password has been removed.");
         closeModal("set-customer-password-modal");
     }
 }
@@ -5639,6 +5664,175 @@ function applyCustomerRolePermissions() {
     }
 }
 
+// ==========================================
+// SECTION LOGIN CHALLENGE & RECOVERY LOGIC
+// ==========================================
+
+function openCustomPasswordChallenge(targetTab) {
+    pendingUnlockTab = targetTab;
+    const targetName = (targetTab === 'reports') ? "Reports" : "Product Inventory";
+    const nameEl = document.getElementById("challenge-target-section-name");
+    const subTitleEl = document.getElementById("challenge-modal-subtitle");
+    const passInput = document.getElementById("challenge-custom-password");
+    const errorBanner = document.getElementById("challenge-password-error");
+
+    if (nameEl) nameEl.innerText = targetName;
+    if (subTitleEl) subTitleEl.innerText = `Custom Password Required for ${targetName}`;
+    if (passInput) passInput.value = "";
+    if (errorBanner) errorBanner.classList.add("hidden");
+
+    openModal("custom-password-challenge-modal");
+    if (passInput) {
+        setTimeout(() => passInput.focus(), 80);
+    }
+}
+
+function cancelCustomPasswordChallenge() {
+    pendingUnlockTab = null;
+    closeModal("custom-password-challenge-modal");
+}
+
+function submitCustomPasswordChallenge() {
+    const passInput = document.getElementById("challenge-custom-password");
+    const entered = passInput ? passInput.value.trim() : "";
+    const errorBanner = document.getElementById("challenge-password-error");
+    const errorMsg = document.getElementById("challenge-error-msg");
+
+    if (!entered) {
+        if (errorMsg) errorMsg.innerText = "Please enter your custom password.";
+        if (errorBanner) errorBanner.classList.remove("hidden");
+        return;
+    }
+
+    if (customerPassword && entered === customerPassword.trim()) {
+        const destTab = pendingUnlockTab || "products";
+        pendingUnlockTab = null;
+        closeModal("custom-password-challenge-modal");
+        if (errorBanner) errorBanner.classList.add("hidden");
+        if (passInput) passInput.value = "";
+        switchTab(destTab, true);
+    } else {
+        if (errorMsg) errorMsg.innerText = "Incorrect custom password. Please try again or click 'Forgot Password?'.";
+        if (errorBanner) errorBanner.classList.remove("hidden");
+        if (passInput) {
+            passInput.select();
+            passInput.focus();
+        }
+    }
+}
+
+function openForgotCustomPasswordModal() {
+    closeModal("custom-password-challenge-modal");
+    const verifyInput = document.getElementById("reset-store-verification");
+    const newPassInput = document.getElementById("reset-new-password");
+    const confirmPassInput = document.getElementById("reset-confirm-password");
+    const errorBanner = document.getElementById("reset-password-error");
+
+    if (verifyInput) verifyInput.value = "";
+    if (newPassInput) newPassInput.value = "";
+    if (confirmPassInput) confirmPassInput.value = "";
+    if (errorBanner) errorBanner.classList.add("hidden");
+
+    openModal("forgot-custom-password-modal");
+    if (verifyInput) {
+        setTimeout(() => verifyInput.focus(), 80);
+    }
+}
+
+function handleResetCustomPassword() {
+    const verifyInput = document.getElementById("reset-store-verification");
+    const newPassInput = document.getElementById("reset-new-password");
+    const confirmPassInput = document.getElementById("reset-confirm-password");
+    const errorBanner = document.getElementById("reset-password-error");
+    const errorMsg = document.getElementById("reset-error-msg");
+    const submitBtn = document.getElementById("reset-submit-btn");
+
+    if (errorBanner) errorBanner.classList.add("hidden");
+
+    const verification = verifyInput ? verifyInput.value.trim() : "";
+    const newPassword = newPassInput ? newPassInput.value.trim() : "";
+    const confirmPassword = confirmPassInput ? confirmPassInput.value.trim() : "";
+
+    if (!verification) {
+        if (errorMsg) errorMsg.innerText = "Please enter your Store Login Password or Registered Mobile Number.";
+        if (errorBanner) errorBanner.classList.remove("hidden");
+        return;
+    }
+
+    if (!newPassword || newPassword.length < 2) {
+        if (errorMsg) errorMsg.innerText = "Please enter a valid new custom password.";
+        if (errorBanner) errorBanner.classList.remove("hidden");
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        if (errorMsg) errorMsg.innerText = "New custom passwords do not match. Please re-enter.";
+        if (errorBanner) errorBanner.classList.remove("hidden");
+        return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+
+    const email = localStorage.getItem("iconnect_user_email") || (currentUser && currentUser.email) || "";
+    const authCache = getAuthCache();
+    const cachedUser = email ? authCache[email.toLowerCase()] : null;
+    const storeMobile = localStorage.getItem("iconnect_store_mobile") || "";
+    const storeMobileAlt = localStorage.getItem("iconnect_store_mobile_alt") || "";
+
+    const cleanVerify = verification.replace(/[^0-9]/g, "");
+    const cleanStoreMobile = storeMobile.replace(/[^0-9]/g, "");
+    const cleanStoreMobileAlt = storeMobileAlt.replace(/[^0-9]/g, "");
+
+    const isLocalMatch = (cachedUser && cachedUser.password === verification) ||
+                         (cleanVerify && cleanVerify.length >= 10 && (cleanVerify === cleanStoreMobile || cleanVerify === cleanStoreMobileAlt));
+
+    fetch('/api/auth/reset-custom-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Pinggy-No-Screen': 'true',
+            'Bypass-Tunnel-Reminder': 'true'
+        },
+        body: JSON.stringify({ email, verification, newCustomPassword: newPassword })
+    })
+    .then(res => res.json().then(data => ({ status: res.status, data })))
+    .then(({ status, data }) => {
+        if (data.success) {
+            applyPasswordResetSuccess(newPassword);
+        } else if (isLocalMatch) {
+            applyPasswordResetSuccess(newPassword);
+        } else {
+            if (errorMsg) errorMsg.innerText = data.error || "Verification failed. Check credentials.";
+            if (errorBanner) errorBanner.classList.remove("hidden");
+        }
+    })
+    .catch(err => {
+        if (isLocalMatch) {
+            applyPasswordResetSuccess(newPassword);
+        } else {
+            if (errorMsg) errorMsg.innerText = "Network unreachable. Verification failed.";
+            if (errorBanner) errorBanner.classList.remove("hidden");
+        }
+    })
+    .finally(() => {
+        if (submitBtn) submitBtn.disabled = false;
+    });
+}
+
+function applyPasswordResetSuccess(newPassword) {
+    customerPassword = newPassword;
+    localStorage.setItem("iconnect_customer_password", customerPassword);
+    saveSyncedData();
+    dispatchDeltaSync("CUSTOMER_PASSWORD_UPDATED", { customerPassword });
+    updateCustomerPasswordModalStatus();
+    closeModal("forgot-custom-password-modal");
+    alert("Custom password reset successfully! You can now access the section.");
+
+    const destTab = pendingUnlockTab || "products";
+    pendingUnlockTab = null;
+    switchTab(destTab, true);
+}
+
 // Window global bindings for customer subsystem
 window.switchCustomerSubTab = switchCustomerSubTab;
 window.renderCustomerDetailsSection = renderCustomerDetailsSection;
@@ -5679,5 +5873,12 @@ window.saveCustomerPassword = saveCustomerPassword;
 window.clearCustomerPassword = clearCustomerPassword;
 window.handleCustomerLogin = handleCustomerLogin;
 window.applyCustomerRolePermissions = applyCustomerRolePermissions;
+window.openCustomPasswordChallenge = openCustomPasswordChallenge;
+window.cancelCustomPasswordChallenge = cancelCustomPasswordChallenge;
+window.submitCustomPasswordChallenge = submitCustomPasswordChallenge;
+window.openForgotCustomPasswordModal = openForgotCustomPasswordModal;
+window.handleResetCustomPassword = handleResetCustomPassword;
+window.applyPasswordResetSuccess = applyPasswordResetSuccess;
+
 
 
