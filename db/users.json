@@ -22,34 +22,10 @@
     "password": "Iconnect101",
     "activeDevices": [
       {
-        "deviceId": "dev_ef93n4r_1790941815942",
-        "deviceName": "Android • Chrome",
-        "loginTime": 1790941817752,
-        "lastActive": 1790941886338
-      },
-      {
-        "deviceId": "dev_v87i1yi_1790941935979",
-        "deviceName": "Windows • Chrome",
-        "loginTime": 1790941936305,
-        "lastActive": 1790941947853
-      },
-      {
-        "deviceId": "dev_7lr5qh9_1790939512624",
+        "deviceId": "dev_32ilnm6_1791038648865",
         "deviceName": "Windows • Edge",
-        "loginTime": 1790939512947,
-        "lastActive": 1790942906548
-      },
-      {
-        "deviceId": "test_dev_resilience_1",
-        "deviceName": "Resilience Test Terminal",
-        "loginTime": 1790943175108,
-        "lastActive": 1791036529312
-      },
-      {
-        "deviceId": "unregistered_brand_new_device_id",
-        "deviceName": "Active POS Terminal",
-        "loginTime": 1790943175124,
-        "lastActive": 1791036529337
+        "loginTime": 1791038682627,
+        "lastActive": 1791038894367
       }
     ],
     "products": [
@@ -94,7 +70,20 @@
       "Mobile Covers"
     ],
     "sales": [],
-    "customers": []
+    "customers": [],
+    "customerPassword": "ABC123",
+    "version": 3,
+    "deltaLog": [
+      {
+        "version": 1,
+        "action": "CUSTOMER_PASSWORD_UPDATED",
+        "payload": {
+          "customerPassword": "ABC123"
+        },
+        "sourceDeviceId": "dev_32ilnm6_1791038648865",
+        "timestamp": 1791038706141
+      }
+    ]
   },
   "iconnect123@gmail.com": {
     "storeName": "iconnect",
