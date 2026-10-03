@@ -261,15 +261,19 @@
                 </div>
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <button onclick="clearAllProducts()" class="px-3 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-semibold flex items-center space-x-1.5 justify-center w-full sm:w-auto cursor-pointer" title="Remove all products from inventory">
+                    <button type="button" onclick="openSetCustomerPasswordModal()" class="owner-only-action px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-sm font-semibold flex items-center space-x-1.5 justify-center w-full sm:w-auto cursor-pointer shadow-2xs" title="Set Customer Login Password for Inventory & Reports">
+                        <i class="fas fa-key text-indigo-500"></i>
+                        <span>Customer Password</span>
+                    </button>
+                    <button onclick="clearAllProducts()" class="owner-only-action px-3 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-semibold flex items-center space-x-1.5 justify-center w-full sm:w-auto cursor-pointer" title="Remove all products from inventory">
                         <i class="fas fa-trash-alt"></i>
                         <span>Clear All</span>
                     </button>
-                    <button onclick="openManageCategoriesModal()" class="theme-red-btn-outline flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold justify-center w-full sm:w-auto">
+                    <button onclick="openManageCategoriesModal()" class="owner-only-action theme-red-btn-outline flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold justify-center w-full sm:w-auto">
                         <i class="fas fa-tags"></i>
                         <span>Manage Categories</span>
                     </button>
-                    <button onclick="openModal('add-product-modal')" class="theme-red-btn flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm justify-center w-full sm:w-auto">
+                    <button onclick="openModal('add-product-modal')" class="owner-only-action theme-red-btn flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm justify-center w-full sm:w-auto">
                         <i class="fas fa-plus"></i>
                         <span>Add New Product</span>
                     </button>
@@ -414,27 +418,27 @@
                             </label>
                             <div class="grid grid-cols-2 gap-2">
                                 <label class="cursor-pointer">
-                                    <input type="radio" name="billing-txn-type" value="Debit" checked class="peer sr-only" onchange="onBillingTxnTypeChange('Debit')">
+                                    <input type="radio" name="billing-txn-type" value="Credit" checked class="peer sr-only" onchange="onBillingTxnTypeChange('Credit')">
                                     <div class="p-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 flex items-center space-x-2 transition-all">
                                         <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
                                             <i class="fas fa-money-bill-wave"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <span class="block text-xs font-bold text-gray-800 leading-tight">Debit Bill</span>
+                                            <span class="block text-xs font-bold text-gray-800 leading-tight">Credit Bill</span>
                                             <span class="block text-[10px] text-gray-500 leading-tight">Direct Paid / Cash</span>
                                         </div>
                                     </div>
                                 </label>
 
                                 <label class="cursor-pointer">
-                                    <input type="radio" name="billing-txn-type" value="Credit" class="peer sr-only" onchange="onBillingTxnTypeChange('Credit')">
+                                    <input type="radio" name="billing-txn-type" value="Debit" class="peer sr-only" onchange="onBillingTxnTypeChange('Debit')">
                                     <div class="p-2.5 rounded-xl border-2 border-gray-200 peer-checked:border-amber-500 peer-checked:bg-amber-50/70 flex items-center space-x-2 transition-all">
                                         <div class="w-7 h-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
                                             <i class="fas fa-hand-holding-dollar"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <span class="block text-xs font-bold text-gray-800 leading-tight">Credit Bill</span>
-                                            <span class="block text-[10px] text-gray-500 leading-tight">Credit Customer Account</span>
+                                            <span class="block text-xs font-bold text-gray-800 leading-tight">Debit Bill</span>
+                                            <span class="block text-[10px] text-gray-500 leading-tight">Customer Due Account</span>
                                         </div>
                                     </div>
                                 </label>
@@ -567,6 +571,10 @@
                         <p class="text-xs text-gray-500 mt-1">Search, filter, and analyze real-time sales revenue, purchase costs, profit, and loss by date and time.</p>
                     </div>
                     <div class="flex items-center space-x-2">
+                        <button type="button" onclick="openSetCustomerPasswordModal()" class="owner-only-action px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-sm font-semibold flex items-center space-x-1.5 shadow-2xs cursor-pointer no-print" title="Set Customer Login Password for Inventory & Reports">
+                            <i class="fas fa-key text-indigo-500"></i>
+                            <span>Customer Password</span>
+                        </button>
                         <button onclick="printReport()" class="theme-red-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2 shadow-sm cursor-pointer no-print">
                             <i class="fas fa-print"></i>
                             <span>Print P&L Report</span>
@@ -961,8 +969,8 @@
                     <span>All Customers &amp; History</span>
                 </button>
                 <button type="button" id="cust-subtab-btn-credit" onclick="switchCustomerSubTab('credit')" class="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all flex items-center space-x-2 cursor-pointer">
-                    <i class="fas fa-user-clock"></i>
-                    <span>Customer Credit Details</span>
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Customer Due Amount Details</span>
                 </button>
             </div>
 
@@ -1053,7 +1061,7 @@
                 </div>
             </div>
 
-            <!-- SUBSECTION 2: CUSTOMER CREDIT DETAILS -->
+            <!-- SUBSECTION 2: CUSTOMER DUE AMOUNT DETAILS -->
             <div id="cust-credit-subsection" class="space-y-6 hidden">
                 <!-- 4 KPI Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1062,9 +1070,9 @@
                             <i class="fas fa-users"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Credit Accounts</p>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Due Accounts</p>
                             <h3 id="cust-metric-total-customers" class="text-2xl font-extrabold text-gray-900">0</h3>
-                            <p class="text-[11px] text-gray-500">Registered accounts</p>
+                            <p class="text-[11px] text-gray-500">Customers with due / debit bills</p>
                         </div>
                     </div>
 
@@ -1073,9 +1081,9 @@
                             <i class="fas fa-receipt"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Credit Extended</p>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Debit Bills</p>
                             <h3 id="cust-metric-total-billed" class="text-2xl font-extrabold text-purple-700">₹0.00</h3>
-                            <p class="text-[11px] text-gray-500">Cumulative credit bills</p>
+                            <p class="text-[11px] text-gray-500">Cumulative debit due bills</p>
                         </div>
                     </div>
 
@@ -1095,7 +1103,7 @@
                             <i class="fas fa-scale-unbalanced"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-amber-800 uppercase tracking-wider">Outstanding Balance</p>
+                            <p class="text-xs font-semibold text-amber-800 uppercase tracking-wider">Customer Due Amount</p>
                             <h3 id="cust-metric-total-outstanding" class="text-2xl font-extrabold text-amber-700">₹0.00</h3>
                             <p class="text-[11px] text-amber-700">Net receivables due</p>
                         </div>
@@ -1114,9 +1122,9 @@
 
                         <div class="flex items-center space-x-2">
                             <select id="customer-credit-status-filter" class="px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
-                                <option value="all">All Accounts</option>
-                                <option value="due">With Outstanding Balance Only</option>
-                                <option value="settled">Fully Settled (₹0 Due)</option>
+                                <option value="all">All Due Accounts</option>
+                                <option value="due">With Outstanding Due Amount Only</option>
+                                <option value="settled">Cleared Accounts (₹0 Due)</option>
                             </select>
                             <span id="cust-filtered-count-badge" class="px-3 py-1.5 rounded-xl bg-gray-200 text-gray-700 text-xs font-bold whitespace-nowrap">
                                 0 Customers
@@ -1132,9 +1140,9 @@
                                     <th class="px-4 py-3">Contact Number</th>
                                     <th class="px-4 py-3">Place &amp; Address</th>
                                     <th class="px-4 py-3 text-center">ID Proof</th>
-                                    <th class="px-4 py-3 text-right">Credit Billed</th>
+                                    <th class="px-4 py-3 text-right">Debit Billed</th>
                                     <th class="px-4 py-3 text-right">Paid Settled</th>
-                                    <th class="px-4 py-3 text-right">Outstanding Due</th>
+                                    <th class="px-4 py-3 text-right">Customer Due Amount</th>
                                     <th class="px-5 py-3 text-right no-print">Actions</th>
                                 </tr>
                             </thead>
@@ -2176,15 +2184,19 @@
                 <p class="text-xs text-gray-500 mt-1">Multi-Device Sales, Invoicing & Inventory Management</p>
             </div>
 
-            <!-- Tab Switcher: Login / Registration Options -->
-            <div class="grid grid-cols-2 p-1.5 bg-gray-100 rounded-xl mt-3">
-                <button type="button" id="tab-btn-login" onclick="toggleAuthForm('login')" class="py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm theme-red-bg text-white flex items-center justify-center space-x-1.5">
+            <!-- Tab Switcher: Login / Registration / Customer Portal Options -->
+            <div class="grid grid-cols-3 p-1.5 bg-gray-100 rounded-xl mt-3 gap-1">
+                <button type="button" id="tab-btn-login" onclick="toggleAuthForm('login')" class="py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm theme-red-bg text-white flex items-center justify-center space-x-1">
                     <i class="fas fa-sign-in-alt text-xs"></i>
                     <span>Sign In</span>
                 </button>
-                <button type="button" id="tab-btn-signup" onclick="toggleAuthForm('signup')" class="py-2.5 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-1.5">
+                <button type="button" id="tab-btn-signup" onclick="toggleAuthForm('signup')" class="py-2.5 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-1">
                     <i class="fas fa-store text-xs"></i>
-                    <span>Register Store</span>
+                    <span>Register</span>
+                </button>
+                <button type="button" id="tab-btn-customer" onclick="toggleAuthForm('customer')" class="py-2.5 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-1">
+                    <i class="fas fa-user-lock text-xs"></i>
+                    <span>Customer</span>
                 </button>
             </div>
 
@@ -2331,6 +2343,36 @@
                         Already have an account? <a href="javascript:void(0)" onclick="toggleAuthForm('login')" class="theme-red-text font-bold hover:underline">Log In Here</a>
                     </p>
                 </form>
+
+                <!-- 3. CUSTOMER LOGIN FORM -->
+                <form id="customer-login-form" class="space-y-4 hidden" onsubmit="event.preventDefault(); handleCustomerLogin();">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-xs text-indigo-900 flex items-start space-x-2.5">
+                        <i class="fas fa-shield-alt text-indigo-600 text-sm mt-0.5"></i>
+                        <div>
+                            <span class="font-bold block">Customer Portal Access</span>
+                            <span class="text-[11px] text-indigo-700">Enter the customer password configured by the store to view Product Inventory and Reports.</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Customer Access Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400"><i class="fas fa-lock text-xs"></i></span>
+                            <input type="password" id="customer-login-password" required placeholder="••••••••" class="w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button type="button" onclick="togglePasswordVisibility('customer-login-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                                <i class="fas fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="customer-login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer">
+                        <span>Access Product Inventory &amp; Reports</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+
+                    <p class="text-xs text-center text-gray-500 pt-1">
+                        Are you the store owner? <a href="javascript:void(0)" onclick="toggleAuthForm('login')" class="theme-red-text font-bold hover:underline">Sign In as Owner</a>
+                    </p>
+                </form>
             </div>
         </div>
     </div>
@@ -2451,6 +2493,54 @@
                 <span><i class="fas fa-shield-alt text-blue-500 mr-1"></i>Protected by 5-Device Account Limit</span>
                 <button onclick="closeModal('device-manager-modal')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700 rounded-lg cursor-pointer">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Set Customer Password Modal (Product Inventory & Reports Access) -->
+    <div id="set-customer-password-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl animate-fade-in border border-gray-100">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-gray-800">Customer Access Password</h3>
+                        <p class="text-[11px] text-gray-500">For viewing Product Inventory &amp; Reports</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModal('set-customer-password-modal')" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="event.preventDefault(); saveCustomerPassword();" class="p-6 space-y-4">
+                <p class="text-xs text-gray-600 leading-relaxed">
+                    Set a password for your customers. Customers can enter this password on the login screen to access your store's <strong>Product Inventory</strong> and <strong>Reports</strong> in view-only mode.
+                </p>
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Set Customer Password</label>
+                    <div class="relative">
+                        <input type="password" id="input-customer-password" placeholder="Enter customer password" class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10">
+                        <button type="button" onclick="togglePasswordVisibility('input-customer-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                            <i class="fas fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="customer-password-status-banner" class="text-xs p-2.5 rounded-xl border hidden"></div>
+                <div class="pt-3 flex items-center justify-between gap-2 border-t border-gray-100">
+                    <button type="button" onclick="clearCustomerPassword()" class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-xl text-xs font-bold transition-all cursor-pointer">
+                        <i class="fas fa-trash-alt mr-1"></i>Remove Password
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" onclick="closeModal('set-customer-password-modal')" class="px-4 py-2 border border-gray-200 text-gray-600 hover:bg-gray-100 rounded-xl text-xs font-bold transition-all cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer flex items-center space-x-1">
+                            <i class="fas fa-save mr-1"></i>Save Password
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 

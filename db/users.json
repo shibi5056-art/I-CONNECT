@@ -43,13 +43,13 @@
         "deviceId": "test_dev_resilience_1",
         "deviceName": "Resilience Test Terminal",
         "loginTime": 1790943175108,
-        "lastActive": 1790943175108
+        "lastActive": 1791036529312
       },
       {
         "deviceId": "unregistered_brand_new_device_id",
         "deviceName": "Active POS Terminal",
         "loginTime": 1790943175124,
-        "lastActive": 1790943175124
+        "lastActive": 1791036529337
       }
     ],
     "products": [
@@ -1787,5 +1787,411 @@
         "timestamp": 1790954879067
       }
     ]
+  },
+  "test_owner_1791036380856@store.com": {
+    "storeName": "Super Mobile Tech",
+    "storeRole": "Smartphones & Gadgets",
+    "place": "Market Junction",
+    "mobile": "9876543210",
+    "additionalMobile": "9876543211",
+    "gst": "32ABCDE1234F1Z5",
+    "email": "test_owner_1791036380856@store.com",
+    "password": "OwnerPassword123",
+    "activeDevices": [
+      {
+        "deviceId": "dev_1791036380857",
+        "deviceName": "Owner POS Console",
+        "loginTime": 1791036380901,
+        "lastActive": 1791036380911
+      }
+    ],
+    "products": [
+      {
+        "id": "P101",
+        "sku": "SKU101",
+        "name": "iPhone 15 Case",
+        "category": "Cases",
+        "purchaseRate": 150,
+        "price": 350,
+        "stock": 25,
+        "minStock": 5
+      },
+      {
+        "id": "P102",
+        "sku": "SKU102",
+        "name": "USB-C Braided Cable",
+        "category": "Cables",
+        "purchaseRate": 80,
+        "price": 200,
+        "stock": 40,
+        "minStock": 10
+      }
+    ],
+    "categories": [
+      "Cases",
+      "Cables"
+    ],
+    "sales": [],
+    "customers": [],
+    "customerPassword": "CustPass2026!",
+    "version": 1
+  },
+  "test_owner_1791036510291@store.com": {
+    "storeName": "Super Mobile Tech",
+    "storeRole": "Smartphones & Gadgets",
+    "place": "Market Junction",
+    "mobile": "9876543210",
+    "additionalMobile": "9876543211",
+    "gst": "32ABCDE1234F1Z5",
+    "email": "test_owner_1791036510291@store.com",
+    "password": "OwnerPassword123",
+    "activeDevices": [
+      {
+        "deviceId": "dev_1791036510291",
+        "deviceName": "Owner POS Console",
+        "loginTime": 1791036510348,
+        "lastActive": 1791036510392
+      }
+    ],
+    "products": [],
+    "categories": [],
+    "sales": [
+      {
+        "id": "S1",
+        "invoiceNo": "INV-DEBIT-001",
+        "total": 1200,
+        "transactionType": "Debit",
+        "customerPhone": "9123456780",
+        "customerName": "Rahul Sharma"
+      },
+      {
+        "id": "S2",
+        "invoiceNo": "INV-CREDIT-002",
+        "total": 850,
+        "transactionType": "Credit",
+        "customerPhone": "9123456781",
+        "customerName": "Ananya Patel"
+      }
+    ],
+    "customers": [
+      {
+        "id": "CUST_001",
+        "name": "Rahul Sharma",
+        "phone": "9123456780",
+        "place": "Downtown",
+        "outstandingBalance": 1200,
+        "totalDebitBilled": 1200,
+        "totalCreditBilled": 0,
+        "totalPaid": 0,
+        "bills": [
+          {
+            "invoiceNo": "INV-DEBIT-001",
+            "date": "2026-10-03T14:08:30.383Z",
+            "total": 1200,
+            "transactionType": "Debit",
+            "status": "Due"
+          }
+        ]
+      },
+      {
+        "id": "CUST_002",
+        "name": "Ananya Patel",
+        "phone": "9123456781",
+        "place": "Uptown",
+        "outstandingBalance": 0,
+        "totalDebitBilled": 0,
+        "totalCreditBilled": 850,
+        "totalPaid": 850,
+        "bills": [
+          {
+            "invoiceNo": "INV-CREDIT-002",
+            "date": "2026-10-03T14:08:30.390Z",
+            "total": 850,
+            "transactionType": "Credit",
+            "status": "Paid"
+          }
+        ]
+      }
+    ],
+    "customerPassword": "NewCustPass2027!",
+    "version": 3,
+    "deltaLog": [
+      {
+        "version": 2,
+        "action": "CUSTOMER_PASSWORD_UPDATED",
+        "payload": {
+          "customerPassword": "NewCustPass2027!"
+        },
+        "sourceDeviceId": "dev_1791036510291",
+        "timestamp": 1791036510380
+      }
+    ]
+  },
+  "delta_sync_test_1791036518473@iconnect.test": {
+    "storeName": "Fast Sync Mobile Mart",
+    "storeRole": "Main Store",
+    "place": "Kozhikode",
+    "mobile": "9845012345",
+    "additionalMobile": "9845099999",
+    "gst": "32ABCDE1234F1Z5",
+    "email": "delta_sync_test_1791036518473@iconnect.test",
+    "password": "Password123!",
+    "activeDevices": [
+      {
+        "deviceId": "dev_1",
+        "deviceName": "Billing Terminal 1 (Cashier Counter)",
+        "loginTime": 1791036518488,
+        "lastActive": 1791036518660
+      }
+    ],
+    "products": [
+      {
+        "id": "P-101",
+        "sku": "SKU101",
+        "name": "iPhone 16 Pro 128GB",
+        "category": "Smartphones",
+        "price": 119900,
+        "stock": 14,
+        "purchaseRate": 98000,
+        "updatedAt": 1791036518660
+      },
+      {
+        "id": "P-102",
+        "sku": "SKU102",
+        "name": "Samsung Galaxy S24 Ultra",
+        "category": "Smartphones",
+        "price": 129999,
+        "stock": 10,
+        "purchaseRate": 105000
+      },
+      {
+        "id": "P-103",
+        "sku": "SKU103",
+        "name": "AirPods Pro 2",
+        "category": "Audio",
+        "price": 24900,
+        "stock": 25,
+        "purchaseRate": 18000
+      }
+    ],
+    "categories": [
+      "Smartphones",
+      "Audio",
+      "Accessories"
+    ],
+    "sales": [
+      {
+        "id": "INV-DELTA-001",
+        "invoiceNo": "INV-DELTA-001",
+        "date": "2026-10-03T14:08:38.652Z",
+        "customerName": "Mohamed Tariq",
+        "customerPhone": "9845012345",
+        "transactionType": "Credit",
+        "isCreditBill": true,
+        "items": [
+          {
+            "id": "P-101",
+            "sku": "SKU101",
+            "name": "iPhone 16 Pro 128GB",
+            "quantity": 1,
+            "price": 119900,
+            "total": 119900
+          }
+        ],
+        "subtotal": 119900,
+        "discount": 0,
+        "tax": 0,
+        "total": 119900
+      }
+    ],
+    "customers": [
+      {
+        "id": "CUST-TARIQ-01",
+        "name": "Mohamed Tariq",
+        "phone": "9845012345",
+        "place": "Kozhikode",
+        "totalCreditBilled": 119900,
+        "totalDebitBilled": 0,
+        "totalPaid": 50000,
+        "outstandingBalance": 69900,
+        "updatedAt": 1791036518777,
+        "settlements": [
+          {
+            "id": "SET-TEST-99",
+            "receiptNo": "REC-1001",
+            "date": "2026-10-03T14:08:38.776Z",
+            "amount": 50000,
+            "paymentMode": "UPI / GPay",
+            "remainingBalance": 69900
+          }
+        ]
+      }
+    ],
+    "version": 3,
+    "deltaLog": [
+      {
+        "version": 2,
+        "action": "SALE_CREATED",
+        "payload": {
+          "sale": {
+            "id": "INV-DELTA-001",
+            "invoiceNo": "INV-DELTA-001",
+            "date": "2026-10-03T14:08:38.652Z",
+            "customerName": "Mohamed Tariq",
+            "customerPhone": "9845012345",
+            "transactionType": "Credit",
+            "isCreditBill": true,
+            "items": [
+              {
+                "id": "P-101",
+                "sku": "SKU101",
+                "name": "iPhone 16 Pro 128GB",
+                "quantity": 1,
+                "price": 119900,
+                "total": 119900
+              }
+            ],
+            "subtotal": 119900,
+            "discount": 0,
+            "tax": 0,
+            "total": 119900
+          },
+          "stockUpdates": [
+            {
+              "id": "P-101",
+              "stock": 14
+            }
+          ],
+          "customerUpdate": {
+            "id": "CUST-TARIQ-01",
+            "name": "Mohamed Tariq",
+            "phone": "9845012345",
+            "place": "Kozhikode",
+            "totalCreditBilled": 119900,
+            "totalDebitBilled": 0,
+            "totalPaid": 50000,
+            "outstandingBalance": 69900,
+            "updatedAt": 1791036518777,
+            "settlements": [
+              {
+                "id": "SET-TEST-99",
+                "receiptNo": "REC-1001",
+                "date": "2026-10-03T14:08:38.776Z",
+                "amount": 50000,
+                "paymentMode": "UPI / GPay",
+                "remainingBalance": 69900
+              }
+            ]
+          }
+        },
+        "sourceDeviceId": "dev_1",
+        "timestamp": 1791036518660
+      },
+      {
+        "version": 3,
+        "action": "PAYMENT_SETTLED",
+        "payload": {
+          "customerId": "CUST-TARIQ-01",
+          "settlement": {
+            "id": "SET-TEST-99",
+            "receiptNo": "REC-1001",
+            "date": "2026-10-03T14:08:38.776Z",
+            "amount": 50000,
+            "paymentMode": "UPI / GPay",
+            "remainingBalance": 69900
+          },
+          "outstandingBalance": 69900,
+          "totalPaid": 50000
+        },
+        "sourceDeviceId": "dev_3",
+        "timestamp": 1791036518777
+      }
+    ]
+  },
+  "sync_tester_1791036527405@iconnect.test": {
+    "storeName": "Global Sync Mobile Mart",
+    "storeRole": "Main Store",
+    "place": "Downtown Center",
+    "mobile": "9876543210",
+    "additionalMobile": "9123456780",
+    "gst": "32ABCDE1234F1Z5",
+    "email": "sync_tester_1791036527405@iconnect.test",
+    "password": "password123",
+    "activeDevices": [
+      {
+        "deviceId": "dev_2",
+        "deviceName": "Device #2 (Mobile POS)",
+        "loginTime": 1791036527466,
+        "lastActive": 1791036528574
+      },
+      {
+        "deviceId": "dev_3",
+        "deviceName": "Device #3 (Mobile POS)",
+        "loginTime": 1791036527487,
+        "lastActive": 1791036527487
+      },
+      {
+        "deviceId": "dev_4",
+        "deviceName": "Device #4 (Mobile POS)",
+        "loginTime": 1791036527513,
+        "lastActive": 1791036527513
+      },
+      {
+        "deviceId": "dev_6",
+        "deviceName": "Device #6 (Now Registered)",
+        "loginTime": 1791036527552,
+        "lastActive": 1791036527598
+      }
+    ],
+    "products": [
+      {
+        "id": "prod_1791036527924",
+        "name": "iPhone 16 Pro Max 256GB Desert Titanium",
+        "category": "Mobile Phones",
+        "purchaseCost": 110000,
+        "sellingPrice": 135000,
+        "stock": 11,
+        "sku": "IPHONE16PRO-DT-256"
+      }
+    ],
+    "categories": [
+      "Mobile Phones"
+    ],
+    "sales": [
+      {
+        "id": "sale_1791036528443",
+        "invoiceNo": "INV-1001",
+        "customerPhone": "9876500001",
+        "customerName": "Arun Kumar",
+        "billType": "credit",
+        "items": [
+          {
+            "id": "prod_1791036527924",
+            "name": "iPhone 16 Pro Max 256GB Desert Titanium",
+            "price": 135000,
+            "quantity": 1,
+            "purchaseCost": 110000,
+            "total": 135000
+          }
+        ],
+        "totalAmount": 135000,
+        "date": "2026-10-03T14:08:48.443Z",
+        "dateTime": "3/10/2026, 7:38:48 pm"
+      }
+    ],
+    "customers": [
+      {
+        "id": "cust_9876500001",
+        "name": "Arun Kumar",
+        "phone": "9876500001",
+        "place": "Kochi",
+        "address": "Palayam Road, Kochi",
+        "creditAccountActive": true,
+        "outstandingBalance": 135000,
+        "totalPurchases": 135000,
+        "createdAt": "2026-10-03T14:08:48.441Z"
+      }
+    ],
+    "version": 2
   }
 }

@@ -31,6 +31,8 @@ let categories = [];
 let customers = [];
 let activeTab = "dashboard";
 let salesChart = null;
+let customerPassword = "";
+let currentUserRole = "owner"; // 'owner' or 'customer'
 
 // Customer Details & Credit Subsystem State
 let activeCustomerSubTab = "all";
@@ -167,34 +169,43 @@ function applyStoreBranding(store) {
     document.title = `${sName} - Sales & Billing Software`;
 }
 
-// Toggle Login / Signup forms
+// Toggle Login / Signup / Customer forms
 function toggleAuthForm(type) {
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
+    const customerForm = document.getElementById("customer-login-form");
     const errorBanner = document.getElementById("auth-error");
     const tabLogin = document.getElementById("tab-btn-login");
     const tabSignup = document.getElementById("tab-btn-signup");
+    const tabCustomer = document.getElementById("tab-btn-customer");
 
     if (errorBanner) errorBanner.classList.add("hidden");
 
+    const inactiveClass = "py-2.5 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-1 cursor-pointer";
+    const activeRedClass = "py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm theme-red-bg text-white flex items-center justify-center space-x-1 cursor-pointer";
+    const activeIndigoClass = "py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm bg-indigo-600 text-white flex items-center justify-center space-x-1 cursor-pointer";
+
+    if (tabLogin) tabLogin.className = inactiveClass;
+    if (tabSignup) tabSignup.className = inactiveClass;
+    if (tabCustomer) tabCustomer.className = inactiveClass;
+
+    if (loginForm) loginForm.classList.add("hidden");
+    if (signupForm) signupForm.classList.add("hidden");
+    if (customerForm) customerForm.classList.add("hidden");
+
     if (type === "signup") {
-        loginForm.classList.add("hidden");
-        signupForm.classList.remove("hidden");
-        if (tabSignup) {
-            tabSignup.className = "py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm theme-red-bg text-white flex items-center justify-center space-x-1.5";
-        }
-        if (tabLogin) {
-            tabLogin.className = "py-2.5 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-1.5";
+        if (signupForm) signupForm.classList.remove("hidden");
+        if (tabSignup) tabSignup.className = activeRedClass;
+    } else if (type === "customer") {
+        if (customerForm) customerForm.classList.remove("hidden");
+        if (tabCustomer) tabCustomer.className = activeIndigoClass;
+        const custPwInput = document.getElementById("customer-login-password");
+        if (custPwInput) {
+            setTimeout(() => custPwInput.focus(), 50);
         }
     } else {
-        signupForm.classList.add("hidden");
-        loginForm.classList.remove("hidden");
-        if (tabLogin) {
-            tabLogin.className = "py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm theme-red-bg text-white flex items-center justify-center space-x-1.5";
-        }
-        if (tabSignup) {
-            tabSignup.className = "py-2.5 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 flex items-center justify-center space-x-1.5";
-        }
+        if (loginForm) loginForm.classList.remove("hidden");
+        if (tabLogin) tabLogin.className = activeRedClass;
     }
 }
 
@@ -347,6 +358,11 @@ function performFullSync() {
             });
         }
 
+        if (serverData.customerPassword !== undefined) {
+            customerPassword = serverData.customerPassword || "";
+            localStorage.setItem("iconnect_customer_password", customerPassword);
+        }
+
         let shouldUpload = false;
         let shouldRedraw = false;
 
@@ -394,7 +410,7 @@ function performFullSync() {
                     'X-Pinggy-No-Screen': 'true',
                     'Bypass-Tunnel-Reminder': 'true'
                 },
-                body: JSON.stringify({ products, categories, sales, customers })
+                body: JSON.stringify({ products, categories, sales, customers, customerPassword })
             }).then(saveRes => {
                 if (saveRes.ok) {
                     localStorage.removeItem("iconnect_pending_sync");
@@ -638,6 +654,13 @@ function applyIncomingDeltaSync(action, payload) {
         if (Array.isArray(newCats)) {
             categories = newCats;
             shouldRedraw = true;
+        }
+    } else if (action === 'CUSTOMER_PASSWORD_UPDATED') {
+        const { customerPassword: newPw } = payload || {};
+        customerPassword = newPw || "";
+        localStorage.setItem("iconnect_customer_password", customerPassword);
+        if (typeof updateCustomerPasswordModalStatus === 'function') {
+            updateCustomerPasswordModalStatus();
         }
     }
 
@@ -898,7 +921,8 @@ function checkAuth() {
         };
 
         applyStoreBranding(currentStore);
-        document.getElementById("user-display-name").innerText = `Welcome, ${currentStore.storeName}`;
+        currentUserRole = localStorage.getItem("iconnect_user_role") || "owner";
+        applyCustomerRolePermissions();
         document.getElementById("auth-screen").classList.add("hidden");
 
         // Load local cache immediately so UI shows instantly
@@ -1155,7 +1179,7 @@ function saveSyncedData() {
                 'x-device-id': getOrCreateDeviceId(),
                 'Bypass-Tunnel-Reminder': 'true'
             },
-            body: JSON.stringify({ products, categories, sales, customers })
+            body: JSON.stringify({ products, categories, sales, customers, customerPassword })
         })
         .then(res => {
             if (res.ok) {
@@ -1232,6 +1256,8 @@ function loadLocalFallback() {
         localStorage.setItem("iconnect_customers_v5", JSON.stringify(customers));
     }
 
+    customerPassword = localStorage.getItem("iconnect_customer_password") || "";
+
     initApp();
 }
 
@@ -1240,6 +1266,7 @@ function saveLocalFallback() {
     localStorage.setItem("iconnect_sales_v5", JSON.stringify(sales));
     localStorage.setItem("iconnect_categories_v5", JSON.stringify(categories));
     localStorage.setItem("iconnect_customers_v5", JSON.stringify(customers));
+    localStorage.setItem("iconnect_customer_password", customerPassword || "");
 }
 
 function saveProducts() {
@@ -1286,6 +1313,8 @@ function logoutUser(confirmPrompt = true) {
         localStorage.removeItem("iconnect_store_mobile");
         localStorage.removeItem("iconnect_store_mobile_alt");
         localStorage.removeItem("iconnect_store_gst");
+        localStorage.removeItem("iconnect_user_role");
+        currentUserRole = "owner";
 
         currentUser = null;
         stopAutoSync();
@@ -1375,6 +1404,8 @@ function tryOfflineLogin(email, password) {
         localStorage.setItem("iconnect_store_mobile", user.mobile || "");
         localStorage.setItem("iconnect_store_mobile_alt", user.additionalMobile || "");
         localStorage.setItem("iconnect_store_gst", user.gst || "");
+        localStorage.setItem("iconnect_user_role", "owner");
+        currentUserRole = "owner";
         
         checkAuth();
         console.log("Logged in successfully via Offline Auth Cache.");
@@ -1472,6 +1503,8 @@ function setupAuthListeners() {
                 localStorage.setItem("iconnect_store_mobile", user.mobile || "");
                 localStorage.setItem("iconnect_store_mobile_alt", user.additionalMobile || "");
                 localStorage.setItem("iconnect_store_gst", user.gst || "");
+                localStorage.setItem("iconnect_user_role", "owner");
+                currentUserRole = "owner";
 
                 if (Array.isArray(user.activeDevices)) {
                     activeDevicesList = user.activeDevices;
@@ -1563,6 +1596,8 @@ function setupAuthListeners() {
                 localStorage.setItem("iconnect_store_mobile", user.mobile);
                 localStorage.setItem("iconnect_store_mobile_alt", user.additionalMobile || "");
                 localStorage.setItem("iconnect_store_gst", user.gst || "");
+                localStorage.setItem("iconnect_user_role", "owner");
+                currentUserRole = "owner";
 
                 if (Array.isArray(user.activeDevices)) {
                     activeDevicesList = user.activeDevices;
@@ -1592,6 +1627,8 @@ function setupAuthListeners() {
             localStorage.setItem("iconnect_store_mobile", localUser.mobile);
             localStorage.setItem("iconnect_store_mobile_alt", localUser.additionalMobile || "");
             localStorage.setItem("iconnect_store_gst", localUser.gst || "");
+            localStorage.setItem("iconnect_user_role", "owner");
+            currentUserRole = "owner";
             localStorage.setItem("iconnect_pending_signup", JSON.stringify(localUser));
 
             checkAuth();
@@ -1633,6 +1670,9 @@ function switchTab(tabId) {
     let effectiveTab = tabId;
     if (tabId === "customer-credit") {
         effectiveTab = "customer-details";
+    }
+    if (currentUserRole === "customer" && effectiveTab !== "products" && effectiveTab !== "reports") {
+        effectiveTab = "products";
     }
     activeTab = effectiveTab;
     fetchSyncedDataSilent();
@@ -1971,12 +2011,14 @@ function renderProductsTable() {
                     <button onclick="openBarcodeModal('${p.id}')" class="text-gray-700 hover:text-red-600 mr-2.5 inline-flex items-center text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-50 shadow-xs" title="Generate, Download & Print Barcode">
                         <i class="fas fa-barcode mr-1 text-red-600"></i> Barcode
                     </button>
+                    ${currentUserRole !== 'customer' ? `
                     <button onclick="openEditProductModal('${p.id}')" class="text-blue-600 hover:text-blue-900 mr-2.5">
                         <i class="fas fa-edit"></i> Edit
                     </button>
                     <button onclick="deleteProduct('${p.id}')" class="text-red-600 hover:text-red-900">
                         <i class="fas fa-trash-alt"></i> Delete
                     </button>
+                    ` : ''}
                 </td>
             </tr>
         `;
@@ -2671,16 +2713,16 @@ function updateCartSummary() {
 }
 
 // Billing Transaction Type Selector (Credit vs Debit)
-let selectedBillingTxnType = "Debit";
+let selectedBillingTxnType = "Credit";
 
 function onBillingTxnTypeChange(type) {
-    selectedBillingTxnType = (type === "Credit") ? "Credit" : "Debit";
+    selectedBillingTxnType = (type === "Debit") ? "Debit" : "Credit";
     const btnText = document.getElementById("billing-checkout-btn-text");
     if (btnText) {
-        if (selectedBillingTxnType === "Credit") {
-            btnText.textContent = "Generate & Print Credit Bill";
+        if (selectedBillingTxnType === "Debit") {
+            btnText.textContent = "Generate & Print Debit Bill (Due)";
         } else {
-            btnText.textContent = "Generate & Print Debit Bill (Paid)";
+            btnText.textContent = "Generate & Print Credit Bill (Paid)";
         }
     }
     onBillingCustomerPhoneChange();
@@ -2712,14 +2754,14 @@ function onBillingCustomerPhoneChange() {
             placeInput.value = matchedCust.place;
         }
 
-        const isCreditSelected = selectedBillingTxnType === "Credit";
+        const isDebitSelected = selectedBillingTxnType === "Debit";
         badgeEl.className = "block p-3 rounded-xl border transition-all " + 
-            (isCreditSelected ? "bg-amber-50/80 border-amber-200 text-amber-900" : "bg-emerald-50/80 border-emerald-200 text-emerald-900");
+            (isDebitSelected ? "bg-amber-50/80 border-amber-200 text-amber-900" : "bg-emerald-50/80 border-emerald-200 text-emerald-900");
         badgeEl.innerHTML = `
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-start space-x-2">
-                    <div class="w-6 h-6 rounded-full ${isCreditSelected ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'} flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                        <i class="fas ${isCreditSelected ? 'fa-user-clock' : 'fa-check'}"></i>
+                    <div class="w-6 h-6 rounded-full ${isDebitSelected ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'} flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                        <i class="fas ${isDebitSelected ? 'fa-user-clock' : 'fa-check'}"></i>
                     </div>
                     <div>
                         <div class="font-bold text-xs flex items-center space-x-1.5">
@@ -2727,8 +2769,8 @@ function onBillingCustomerPhoneChange() {
                             <span class="text-[10px] font-normal px-1.5 py-0.2 rounded bg-white/80 border">${escapeHtml(matchedCust.place || 'Registered')}</span>
                         </div>
                         <div class="text-[11px] text-gray-600 mt-0.5">
-                            Credit Due: <strong class="text-amber-700">₹${(matchedCust.outstandingBalance || 0).toFixed(2)}</strong>
-                            ${isCreditSelected ? ' • <span class="text-amber-800 font-semibold">Bill will be added to Credit Account</span>' : ' • <span class="text-emerald-700">Immediate Payment (Debit)</span>'}
+                            Customer Due Amount: <strong class="text-amber-700">₹${(matchedCust.outstandingBalance || 0).toFixed(2)}</strong>
+                            ${isDebitSelected ? ' • <span class="text-amber-800 font-semibold">Bill will be added to Customer Due Account</span>' : ' • <span class="text-emerald-700">Immediate Payment (Credit / Paid)</span>'}
                         </div>
                     </div>
                 </div>
@@ -2738,13 +2780,13 @@ function onBillingCustomerPhoneChange() {
             </div>
         `;
     } else {
-        if (selectedBillingTxnType === "Credit" && cleanNum.length >= 10) {
+        if (selectedBillingTxnType === "Debit" && cleanNum.length >= 10) {
             badgeEl.className = "block p-2.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 text-xs";
             badgeEl.innerHTML = `
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center space-x-1.5">
                         <i class="fas fa-info-circle text-amber-600"></i>
-                        <span>Mobile <strong>+91 ${cleanNum}</strong> will be registered automatically upon billing.</span>
+                        <span>Mobile <strong>+91 ${cleanNum}</strong> will be registered automatically upon debit billing.</span>
                     </div>
                     <button type="button" onclick="quickRegisterCreditCustomer('${cleanNum}')" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs whitespace-nowrap">
                         + Register Account
@@ -2791,8 +2833,8 @@ function processCheckout() {
     const total = subtotalAfterDiscount + tax;
 
     const invoiceNo = "INV-" + (1000 + sales.length + 1);
-    const transactionType = selectedBillingTxnType || "Debit";
-    const isCreditBill = (transactionType === "Credit");
+    const transactionType = selectedBillingTxnType || "Credit";
+    const isDebitBill = (transactionType === "Debit");
 
     // Match or automatically create registered customer profile by phone
     const cleanCustomerPhone = cleanPhone(customerPhone);
@@ -2831,12 +2873,13 @@ function processCheckout() {
         }
 
         // Maintain continuous customer history & balances:
-        if (isCreditBill) {
-            matchedCustomer.totalCreditBilled = (matchedCustomer.totalCreditBilled || 0) + total;
+        if (isDebitBill) {
+            // Debit bill: added to customer due amount
+            matchedCustomer.totalDebitBilled = (matchedCustomer.totalDebitBilled || 0) + total;
             matchedCustomer.outstandingBalance = (matchedCustomer.outstandingBalance || 0) + total;
         } else {
-            // Debit bill: recorded as paid purchase
-            matchedCustomer.totalDebitBilled = (matchedCustomer.totalDebitBilled || 0) + total;
+            // Credit bill: recorded as paid cash purchase
+            matchedCustomer.totalCreditBilled = (matchedCustomer.totalCreditBilled || 0) + total;
             matchedCustomer.totalPaid = (matchedCustomer.totalPaid || 0) + total;
         }
         matchedCustomer.updatedAt = Date.now();
@@ -2929,11 +2972,11 @@ function processCheckout() {
     document.getElementById("billing-tax-rate").value = "5"; // Reset default tax
 
     // Reset transaction type selection
-    selectedBillingTxnType = "Debit";
-    const debitRadio = document.querySelector('input[name="billing-txn-type"][value="Debit"]');
-    if (debitRadio) debitRadio.checked = true;
+    selectedBillingTxnType = "Credit";
+    const creditRadio = document.querySelector('input[name="billing-txn-type"][value="Credit"]');
+    if (creditRadio) creditRadio.checked = true;
     const btnText = document.getElementById("billing-checkout-btn-text");
-    if (btnText) btnText.textContent = "Generate & Print Bill (Debit)";
+    if (btnText) btnText.textContent = "Generate & Print Credit Bill (Paid)";
     const badgeEl = document.getElementById("billing-cust-credit-badge");
     if (badgeEl) { badgeEl.className = "hidden"; badgeEl.innerHTML = ""; }
 
@@ -4258,8 +4301,9 @@ function renderCustomerDetailsSection() {
     if (elAllPurchasesVol) elAllPurchasesVol.innerText = `₹${totalPurchasesVolume.toFixed(2)}`;
     if (elAllCreditDue) elAllCreditDue.innerText = `₹${totalCreditReceivables.toFixed(2)}`;
 
-    // 2. Calculate KPI Metrics for Credit Subsection
-    const totalCreditBilled = (customers || []).reduce((acc, c) => acc + (c.totalCreditBilled || 0), 0);
+    // 2. Calculate KPI Metrics for Due Amount Subsection (Customers with Debit bills or Due Amount)
+    const dueCustomers = (customers || []).filter(c => (c.outstandingBalance > 0) || ((c.totalDebitBilled || 0) > 0));
+    const totalDebitBilled = (customers || []).reduce((acc, c) => acc + (c.totalDebitBilled || 0), 0);
     const totalPaid = (customers || []).reduce((acc, c) => acc + (c.totalPaid || 0), 0);
     const totalOutstanding = (customers || []).reduce((acc, c) => acc + (c.outstandingBalance || 0), 0);
 
@@ -4268,8 +4312,8 @@ function renderCustomerDetailsSection() {
     const elPaid = document.getElementById("cust-metric-total-paid");
     const elDue = document.getElementById("cust-metric-total-outstanding");
 
-    if (elCustCount) elCustCount.innerText = totalCustomers;
-    if (elBilled) elBilled.innerText = `₹${totalCreditBilled.toFixed(2)}`;
+    if (elCustCount) elCustCount.innerText = dueCustomers.length;
+    if (elBilled) elBilled.innerText = `₹${totalDebitBilled.toFixed(2)}`;
     if (elPaid) elPaid.innerText = `₹${totalPaid.toFixed(2)}`;
     if (elDue) elDue.innerText = `₹${totalOutstanding.toFixed(2)}`;
 
@@ -4441,6 +4485,11 @@ function renderCustomerCreditTable() {
 
     const filtered = (customers || []).filter(c => {
         if (!c) return false;
+
+        // Only Customer Debit Bills or Customer Due Amount are displayed in this section
+        const hasDebitOrDue = ((c.outstandingBalance || 0) > 0) || ((c.totalDebitBilled || 0) > 0);
+        if (!hasDebitOrDue) return false;
+
         // Search query filter (matches Name, Phone, Place, Address)
         if (searchQuery) {
             const nameMatch = (c.name || "").toLowerCase().includes(searchQuery);
@@ -4469,13 +4518,13 @@ function renderCustomerCreditTable() {
             <tr class="no-print">
                 <td colspan="8" class="px-6 py-12 text-center text-gray-400">
                     <div class="flex flex-col items-center justify-center space-y-2">
-                        <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl">
-                            <i class="fas fa-users-slash"></i>
+                        <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-xl">
+                            <i class="fas fa-file-invoice-dollar"></i>
                         </div>
-                        <p class="text-sm font-semibold text-gray-700">No Customer Credit Accounts Found</p>
-                        <p class="text-xs text-gray-400">Click &quot;Add New Customer&quot; above to create a new credit account.</p>
+                        <p class="text-sm font-semibold text-gray-700">No Customer Due Accounts Found</p>
+                        <p class="text-xs text-gray-400">Only customers with Customer Debit Bills or active Customer Due Amount appear in this section.</p>
                         <button type="button" onclick="openAddCustomerModal()" class="mt-2 theme-red-bg hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer">
-                            + Add First Customer
+                            + Add New Customer
                         </button>
                     </div>
                 </td>
@@ -4486,7 +4535,7 @@ function renderCustomerCreditTable() {
 
     filtered.forEach(c => {
         const balance = c.outstandingBalance || 0;
-        const totalBilled = c.totalCreditBilled || 0;
+        const totalBilled = c.totalDebitBilled || 0;
         const totalPaid = c.totalPaid || 0;
         const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "-";
 
@@ -4514,9 +4563,15 @@ function renderCustomerCreditTable() {
                             <span>+91</span>
                             <span>${escapeHtml(c.phone || '-')}</span>
                         </div>
-                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <i class="fas fa-check-circle mr-1 text-[9px]"></i>Active Credit
-                        </span>
+                        ${balance > 0 ? `
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                <i class="fas fa-clock mr-1 text-[9px]"></i>Active Due
+                            </span>
+                        ` : `
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <i class="fas fa-check-circle mr-1 text-[9px]"></i>Due Cleared
+                            </span>
+                        `}
                     </div>
                 </td>
 
@@ -5198,15 +5253,15 @@ function openCustomerLedgerModal(customerId) {
 
     // All Customer Invoices (Both Debit and Credit Bills)
     allCustomerSales.forEach(s => {
-        const isCredit = (s.transactionType === "Credit");
+        const isDebit = (s.transactionType === "Debit");
         timeline.push({
             date: new Date(s.date).getTime(),
             dateStr: new Date(s.date).toLocaleString(),
-            type: isCredit ? "credit" : "debit",
+            type: isDebit ? "debit" : "credit",
             ref: s.invoiceNo,
-            desc: `${(s.items || []).length} items • ${isCredit ? 'Credit Bill' : 'Debit Bill (Paid)'}`,
-            debit: isCredit ? 0 : (s.total || 0),
-            credit: isCredit ? (s.total || 0) : 0,
+            desc: `${(s.items || []).length} items • ${isDebit ? 'Debit Bill (Due Amount)' : 'Credit Bill (Paid)'}`,
+            debit: isDebit ? (s.total || 0) : 0,
+            credit: isDebit ? 0 : (s.total || 0),
             settled: 0,
             saleId: s.id
         });
@@ -5365,6 +5420,225 @@ function printCustomerLedger() {
     }, 150);
 }
 
+// ==========================================
+// CUSTOMER PORTAL & PASSWORD ACCESS SYSTEM
+// ==========================================
+
+function togglePasswordVisibility(inputId, btnEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPw = input.type === 'password';
+    input.type = isPw ? 'text' : 'password';
+    if (btnEl) {
+        const icon = btnEl.querySelector('i');
+        if (icon) {
+            icon.className = isPw ? 'fas fa-eye-slash text-xs' : 'fas fa-eye text-xs';
+        }
+    }
+}
+
+function updateCustomerPasswordModalStatus() {
+    const banner = document.getElementById("customer-password-status-banner");
+    const input = document.getElementById("input-customer-password");
+    if (input) input.value = customerPassword || "";
+    if (banner) {
+        if (customerPassword && customerPassword.trim()) {
+            banner.className = "text-xs p-2.5 rounded-xl border bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center space-x-2";
+            banner.innerHTML = `<i class="fas fa-check-circle text-emerald-600"></i><span>Customer password is configured and active.</span>`;
+            banner.classList.remove("hidden");
+        } else {
+            banner.className = "text-xs p-2.5 rounded-xl border bg-amber-50 text-amber-800 border-amber-200 flex items-center space-x-2";
+            banner.innerHTML = `<i class="fas fa-exclamation-triangle text-amber-600"></i><span>No password configured. Customers cannot log in until a password is set.</span>`;
+            banner.classList.remove("hidden");
+        }
+    }
+}
+
+function openSetCustomerPasswordModal() {
+    if (currentUserRole === 'customer') {
+        alert("Only store owners can configure customer access passwords.");
+        return;
+    }
+    updateCustomerPasswordModalStatus();
+    openModal("set-customer-password-modal");
+}
+
+function saveCustomerPassword() {
+    const input = document.getElementById("input-customer-password");
+    const val = input ? input.value.trim() : "";
+    if (!val) {
+        alert("Please enter a valid password for customer access.");
+        return;
+    }
+    customerPassword = val;
+    localStorage.setItem("iconnect_customer_password", customerPassword);
+    saveSyncedData();
+    dispatchDeltaSync("CUSTOMER_PASSWORD_UPDATED", { customerPassword });
+    updateCustomerPasswordModalStatus();
+    alert("Customer password saved successfully! Customers can now log in using this password to view Product Inventory and Reports.");
+    closeModal("set-customer-password-modal");
+}
+
+function clearCustomerPassword() {
+    if (!customerPassword) {
+        alert("No customer password is currently configured.");
+        return;
+    }
+    if (confirm("Are you sure you want to remove the customer access password? Customers will not be able to log in until a new password is set.")) {
+        customerPassword = "";
+        localStorage.removeItem("iconnect_customer_password");
+        saveSyncedData();
+        dispatchDeltaSync("CUSTOMER_PASSWORD_UPDATED", { customerPassword: "" });
+        updateCustomerPasswordModalStatus();
+        alert("Customer password has been removed.");
+        closeModal("set-customer-password-modal");
+    }
+}
+
+function handleCustomerLogin() {
+    const passInput = document.getElementById("customer-login-password");
+    const password = passInput ? passInput.value.trim() : "";
+    const errorBanner = document.getElementById("auth-error");
+    const errorMsg = document.getElementById("auth-error-msg");
+    const submitBtn = document.getElementById("customer-login-btn");
+
+    if (errorBanner) errorBanner.classList.add("hidden");
+    if (!password) {
+        if (errorMsg) errorMsg.innerText = "Please enter the customer access password.";
+        if (errorBanner) errorBanner.classList.remove("hidden");
+        return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+
+    const deviceId = getOrCreateDeviceId();
+    const deviceName = getDeviceName();
+
+    fetch('/api/auth/customer-login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Pinggy-No-Screen': 'true',
+            'Bypass-Tunnel-Reminder': 'true'
+        },
+        body: JSON.stringify({ password, deviceId, deviceName })
+    })
+    .then(res => res.json().then(data => ({ status: res.status, data })))
+    .then(({ status, data }) => {
+        if (data.offline || status >= 500) {
+            const cachedPw = customerPassword || localStorage.getItem("iconnect_customer_password");
+            if (cachedPw && cachedPw === password) {
+                applyCustomerLoginSuccess({
+                    email: localStorage.getItem("iconnect_user_email") || "customer@store.local",
+                    storeName: localStorage.getItem("iconnect_store_name") || "Sales & Billing Software",
+                    storeRole: localStorage.getItem("iconnect_store_role") || "Point of Sale & Billing Management",
+                    place: localStorage.getItem("iconnect_store_place") || "",
+                    mobile: localStorage.getItem("iconnect_store_mobile") || "",
+                    gst: localStorage.getItem("iconnect_store_gst") || ""
+                });
+                return;
+            }
+        }
+
+        if (data.error) {
+            const cachedPw = customerPassword || localStorage.getItem("iconnect_customer_password");
+            if (cachedPw && cachedPw === password) {
+                applyCustomerLoginSuccess({
+                    email: localStorage.getItem("iconnect_user_email") || "customer@store.local",
+                    storeName: localStorage.getItem("iconnect_store_name") || "Sales & Billing Software",
+                    storeRole: localStorage.getItem("iconnect_store_role") || "Point of Sale & Billing Management",
+                    place: localStorage.getItem("iconnect_store_place") || "",
+                    mobile: localStorage.getItem("iconnect_store_mobile") || "",
+                    gst: localStorage.getItem("iconnect_store_gst") || ""
+                });
+                return;
+            }
+            if (errorMsg) errorMsg.innerText = data.error;
+            if (errorBanner) errorBanner.classList.remove("hidden");
+        } else if (data.success && data.store) {
+            applyCustomerLoginSuccess(data.store);
+        }
+    })
+    .catch(err => {
+        const cachedPw = customerPassword || localStorage.getItem("iconnect_customer_password");
+        if (cachedPw && cachedPw === password) {
+            applyCustomerLoginSuccess({
+                email: localStorage.getItem("iconnect_user_email") || "customer@store.local",
+                storeName: localStorage.getItem("iconnect_store_name") || "Sales & Billing Software",
+                storeRole: localStorage.getItem("iconnect_store_role") || "Point of Sale & Billing Management",
+                place: localStorage.getItem("iconnect_store_place") || "",
+                mobile: localStorage.getItem("iconnect_store_mobile") || "",
+                gst: localStorage.getItem("iconnect_store_gst") || ""
+            });
+            return;
+        }
+        if (errorMsg) errorMsg.innerText = "Connection unreachable. Please verify password.";
+        if (errorBanner) errorBanner.classList.remove("hidden");
+    })
+    .finally(() => {
+        if (submitBtn) submitBtn.disabled = false;
+    });
+}
+
+function applyCustomerLoginSuccess(store) {
+    currentUserRole = "customer";
+    localStorage.setItem("iconnect_user_role", "customer");
+    if (store) {
+        if (store.email) localStorage.setItem("iconnect_user_email", store.email);
+        if (store.storeName) localStorage.setItem("iconnect_store_name", store.storeName);
+        if (store.storeRole) localStorage.setItem("iconnect_store_role", store.storeRole);
+        if (store.place) localStorage.setItem("iconnect_store_place", store.place);
+        if (store.mobile) localStorage.setItem("iconnect_store_mobile", store.mobile);
+        if (store.additionalMobile) localStorage.setItem("iconnect_store_mobile_alt", store.additionalMobile);
+        if (store.gst) localStorage.setItem("iconnect_store_gst", store.gst);
+    }
+    checkAuth();
+    switchTab("products");
+}
+
+function applyCustomerRolePermissions() {
+    const isCustomer = currentUserRole === "customer";
+    
+    // Sidebar navigation tabs restricted for customers
+    const restrictedTabs = ["dashboard", "billing", "sales-history", "customer-details"];
+    document.querySelectorAll(".nav-link").forEach(link => {
+        const tab = link.getAttribute("data-tab");
+        if (restrictedTabs.includes(tab)) {
+            if (isCustomer) {
+                link.classList.add("hidden");
+            } else {
+                link.classList.remove("hidden");
+            }
+        }
+    });
+
+    // Owner only action buttons
+    document.querySelectorAll(".owner-only-action").forEach(el => {
+        if (isCustomer) {
+            el.classList.add("hidden");
+        } else {
+            el.classList.remove("hidden");
+        }
+    });
+
+    // Header display name
+    const userDisplayEl = document.getElementById("user-display-name");
+    if (userDisplayEl) {
+        if (isCustomer) {
+            userDisplayEl.innerText = "Customer Portal (View Only)";
+            userDisplayEl.className = "text-xs font-bold text-indigo-700 hidden lg:inline";
+        } else {
+            userDisplayEl.innerText = `Welcome, ${currentStore.storeName || "Owner"}`;
+            userDisplayEl.className = "text-xs font-bold theme-red-text hidden lg:inline";
+        }
+    }
+
+    // If currently on a restricted tab, switch to products
+    if (isCustomer && restrictedTabs.includes(activeTab)) {
+        switchTab("products");
+    }
+}
+
 // Window global bindings for customer subsystem
 window.switchCustomerSubTab = switchCustomerSubTab;
 window.renderCustomerDetailsSection = renderCustomerDetailsSection;
@@ -5397,4 +5671,13 @@ window.onBillingCustomerPhoneChange = onBillingCustomerPhoneChange;
 window.maskPhoneNumber = maskPhoneNumber;
 window.dispatchDeltaSync = dispatchDeltaSync;
 window.applyIncomingDeltaSync = applyIncomingDeltaSync;
+window.toggleAuthForm = toggleAuthForm;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.openSetCustomerPasswordModal = openSetCustomerPasswordModal;
+window.updateCustomerPasswordModalStatus = updateCustomerPasswordModalStatus;
+window.saveCustomerPassword = saveCustomerPassword;
+window.clearCustomerPassword = clearCustomerPassword;
+window.handleCustomerLogin = handleCustomerLogin;
+window.applyCustomerRolePermissions = applyCustomerRolePermissions;
+
 

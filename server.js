@@ -515,10 +515,54 @@ const server = http.createServer((req, res) => {
                             additionalMobile: user.additionalMobile || '',
                             gst: user.gst || '',
                             email: normalizedEmail,
+                            customerPassword: user.customerPassword || '',
                             activeDevices: user.activeDevices
                         }
                     }));
                     
+                } else if (req.url === '/api/auth/customer-login') {
+                    const { email, password, deviceId, deviceName } = body;
+                    let targetUser = null;
+                    let normalizedEmail = (email || '').toLowerCase().trim();
+
+                    if (normalizedEmail && db[normalizedEmail]) {
+                        targetUser = db[normalizedEmail];
+                    } else {
+                        // Find matching store with this customer password
+                        const emails = Object.keys(db);
+                        for (const em of emails) {
+                            if (db[em] && db[em].customerPassword && db[em].customerPassword === password) {
+                                targetUser = db[em];
+                                normalizedEmail = em;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!targetUser || !targetUser.customerPassword || targetUser.customerPassword !== password) {
+                        res.writeHead(401);
+                        res.end(JSON.stringify({ error: 'Invalid customer access password.' }));
+                        return;
+                    }
+
+                    res.writeHead(200);
+                    const storeProfile = {
+                        storeName: targetUser.storeName || targetUser.name || 'Sales & Billing Software',
+                        storeRole: targetUser.storeRole || 'Point of Sale & Billing Management',
+                        place: targetUser.place || '',
+                        mobile: targetUser.mobile || '',
+                        additionalMobile: targetUser.additionalMobile || '',
+                        gst: targetUser.gst || '',
+                        email: normalizedEmail,
+                        isCustomerView: true
+                    };
+                    res.end(JSON.stringify({
+                        success: true,
+                        role: 'customer',
+                        store: storeProfile,
+                        user: storeProfile
+                    }));
+
                 } else if (req.url === '/api/auth/logout') {
                     const { email, deviceId } = body;
                     const normalizedEmail = (email || '').toLowerCase().trim();
@@ -671,6 +715,9 @@ const server = http.createServer((req, res) => {
                         if (Array.isArray(categories)) {
                             user.categories = categories;
                         }
+                    } else if (action === 'CUSTOMER_PASSWORD_UPDATED') {
+                        const { customerPassword } = payload;
+                        user.customerPassword = customerPassword || '';
                     }
 
                     // 2. Increment version and append to ring buffer
@@ -718,12 +765,15 @@ const server = http.createServer((req, res) => {
                         if (dev) dev.lastActive = Date.now();
                     }
 
-                    const { products, categories, sales, customers } = body;
+                    const { products, categories, sales, customers, customerPassword } = body;
                     user.products = products || [];
                     user.categories = categories || [];
                     user.sales = sales || [];
                     if (customers !== undefined) {
                         user.customers = customers || [];
+                    }
+                    if (customerPassword !== undefined) {
+                        user.customerPassword = customerPassword || '';
                     }
                     user.version = (user.version || 0) + 1;
                     scheduleWriteUsersDB(db);
@@ -770,6 +820,7 @@ const server = http.createServer((req, res) => {
                     categories: user.categories || [],
                     sales: user.sales || [],
                     customers: user.customers || [],
+                    customerPassword: user.customerPassword || '',
                     version: user.version || 0
                 });
                 return;
