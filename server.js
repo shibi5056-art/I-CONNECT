@@ -281,6 +281,32 @@ process.on('exit', cleanupChildProcesses);
 process.on('SIGINT', () => { cleanupChildProcesses(); process.exit(); });
 process.on('SIGTERM', () => { cleanupChildProcesses(); process.exit(); });
 
+// Periodic watchdog health check: auto-reconnects tunnels if system was sleeping or connection died
+let consecutiveCfFailures = 0;
+setInterval(() => {
+    if (!cloudflareTunnelUrl || !cloudflareProcess) return;
+    const https = require('https');
+    const req = https.get(cloudflareTunnelUrl, { timeout: 8000 }, (res) => {
+        consecutiveCfFailures = 0;
+    });
+    req.on('error', () => {
+        consecutiveCfFailures++;
+        if (consecutiveCfFailures >= 2) {
+            console.warn('Cloudflare tunnel unresponsive after sleep/network drop. Auto-healing...');
+            cleanupChildProcesses();
+            cloudflareTunnelUrl = null;
+            consecutiveCfFailures = 0;
+            setTimeout(() => {
+                isStartingCloudflare = false;
+                startCloudflareTunnel();
+            }, 1000);
+        }
+    });
+    req.on('timeout', () => {
+        req.destroy();
+    });
+}, 45000);
+
 async function startTunnel() {
     if (process.env.RENDER || process.env.RAILWAY_ENVIRONMENT || process.env.FLY_APP_NAME || process.env.IS_CLOUD) {
         console.log('Running on cloud hosting platform. Tunnel bypassed (direct cloud HTTPS active).');
